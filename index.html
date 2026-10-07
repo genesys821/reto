@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<title>Reto de Celdas — Siembra saberes y conocimientos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F1226;
+    --surface:#171B36;
+    --surface-2:#1E2448;
+    --line:#333A66;
+    --text:#F1F3FF;
+    --text-dim:#9CA3D4;
+    --amber:#FFB020;
+    --amber-ink:#241705;
+    --violet:#7C6CF0;
+    --good:#34D399;
+    --bad:#FB6B6B;
+    --radius:16px;
+    --font-display:'Space Grotesk', system-ui, sans-serif;
+    --font-body:'Inter', system-ui, sans-serif;
+    --font-mono:'JetBrains Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--line) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0/40px 40px,
+      var(--ink);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .app{max-width:520px;margin:0 auto;min-height:100vh;padding:20px 18px 40px;display:flex;flex-direction:column;}
+  .view{display:none;flex:1;flex-direction:column;}
+  .view.active{display:flex;}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:22px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:8px;background:var(--surface);
+    border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-mono);font-weight:700;color:var(--amber);font-size:13px;flex-shrink:0;
+  }
+  .brand-text{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:.2px;}
+  .brand-text span{color:var(--text-dim);font-weight:500;}
+  .eyebrow{
+    font-family:var(--font-mono);font-size:11px;color:var(--amber);letter-spacing:1.5px;
+    text-transform:uppercase;margin:0 0 8px;font-weight:700;
+  }
+  h1{font-family:var(--font-display);font-size:26px;line-height:1.15;margin:0 0 8px;font-weight:700;}
+  h2{font-family:var(--font-display);font-size:20px;margin:0 0 4px;font-weight:600;}
+  p.lead{color:var(--text-dim);font-size:14.5px;line-height:1.5;margin:0 0 22px;}
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;margin-bottom:14px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+  .field input[type=text], .field input[type=password], .field select{
+    width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;
+    padding:13px 14px;color:var(--text);font-size:15px;font-family:var(--font-body);
+  }
+  .field input[type=text]:focus, .field input[type=password]:focus, .field select:focus{outline:2px solid var(--amber);outline-offset:1px;}
+  .field input.mono{font-family:var(--font-mono);text-transform:uppercase;letter-spacing:2px;font-weight:700;}
+  .seg{display:flex;gap:8px;}
+  .seg button{
+    flex:1;padding:12px 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);
+    color:var(--text-dim);font-family:var(--font-body);font-weight:600;font-size:13.5px;cursor:pointer;
+  }
+  .seg button.active{background:var(--amber);color:var(--amber-ink);border-color:var(--amber);}
+  .btn{
+    display:block;width:100%;text-align:center;padding:15px 16px;border-radius:12px;border:none;
+    font-family:var(--font-display);font-weight:700;font-size:15.5px;cursor:pointer;letter-spacing:.2px;
+  }
+  .btn-primary{background:var(--amber);color:var(--amber-ink);}
+  .btn-primary:active{transform:scale(.98);}
+  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line);}
+  .btn-violet{background:var(--violet);color:#fff;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-row{display:flex;gap:10px;}
+  .btn-row .btn{flex:1;}
+  .link-back{
+    background:none;border:none;color:var(--text-dim);font-family:var(--font-mono);font-size:12px;
+    cursor:pointer;padding:8px 0;text-align:left;margin-bottom:10px;align-self:flex-start;
+  }
+  .link-back:hover{color:var(--text);}
+
+  /* Celda de código (elemento distintivo) */
+  .cell-wrap{margin:6px 0 20px;}
+  .cell-refs{display:flex;font-family:var(--font-mono);font-size:10px;color:var(--text-dim);}
+  .cell-refs .col{flex:1;text-align:center;padding-bottom:4px;}
+  .cell-row{display:flex;align-items:stretch;}
+  .row-num{
+    width:22px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);
+    font-size:10px;color:var(--text-dim);
+  }
+  .cell-selected{
+    flex:1;background:var(--surface-2);border:2.5px solid var(--amber);border-radius:6px;
+    padding:22px 10px;text-align:center;position:relative;
+    box-shadow:0 0 0 4px rgba(255,176,32,.12);
+  }
+  .cell-selected .code-out{
+    font-family:var(--font-mono);font-size:38px;font-weight:700;letter-spacing:10px;color:var(--amber);
+  }
+  .cell-handle{position:absolute;width:8px;height:8px;background:var(--amber);right:-4px;bottom:-4px;border-radius:1px;}
+  .fx-bar{
+    display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);
+    background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px;
+  }
+  .fx-bar b{color:var(--amber);font-weight:700;}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;
+    background:var(--surface-2);border:1px solid var(--line);padding:5px 10px;border-radius:20px;color:var(--text-dim);
+  }
+  .badge.live{color:var(--good);border-color:rgba(52,211,153,.4);}
+  .badge.live .dot{width:6px;height:6px;border-radius:50%;background:var(--good);animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+  .row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+
+  .roster{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .chip{background:var(--surface-2);border:1px solid var(--line);border-radius:20px;padding:7px 13px;font-size:13px;font-weight:600;}
+
+  .qtag{font-family:var(--font-mono);font-size:11px;color:var(--violet);font-weight:700;margin-bottom:6px;}
+  .qtext{font-family:var(--font-display);font-size:19px;font-weight:600;line-height:1.35;margin-bottom:18px;}
+  .opt{
+    display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:14px 15px;margin-bottom:10px;
+    border-radius:12px;border:1.5px solid var(--line);background:var(--surface-2);color:var(--text);
+    font-size:14.5px;font-family:var(--font-body);font-weight:500;cursor:pointer;
+  }
+  .opt .k{
+    font-family:var(--font-mono);font-weight:700;color:var(--text-dim);width:20px;flex-shrink:0;
+  }
+  .opt.selected{border-color:var(--amber);background:rgba(255,176,32,.12);}
+  .opt.correct{border-color:var(--good);background:rgba(52,211,153,.14);}
+  .opt.incorrect{border-color:var(--bad);background:rgba(251,107,107,.14);}
+  .opt:disabled{cursor:default;}
+
+  .timerwrap{height:6px;background:var(--surface-2);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+  .timerbar{height:100%;background:var(--amber);transition:width 1s linear;}
+
+  table.report{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.report th{
+    text-align:left;font-family:var(--font-mono);font-size:10.5px;color:var(--text-dim);text-transform:uppercase;
+    letter-spacing:.5px;padding:8px 8px;border-bottom:1px solid var(--line);
+  }
+  table.report td{padding:10px 8px;border-bottom:1px solid var(--line);}
+  .bar-cell{display:flex;align-items:center;gap:8px;}
+  .bar-track{flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;}
+  .bar-fill{height:100%;background:var(--violet);}
+  .rank-item{
+    display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:12px;margin-bottom:8px;
+  }
+  .rank-num{font-family:var(--font-mono);font-weight:700;color:var(--text-dim);width:22px;}
+  .rank-item:nth-child(1) .rank-num{color:var(--amber);}
+  .rank-name{flex:1;font-weight:600;font-size:14.5px;}
+  .rank-score{font-family:var(--font-mono);font-weight:700;color:var(--good);}
+  .empty{color:var(--text-dim);font-size:13.5px;text-align:center;padding:24px 10px;}
+  .helptext{font-size:12.5px;color:var(--text-dim);line-height:1.5;margin-top:4px;}
+  .toast{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--surface-2);
+    border:1px solid var(--line);padding:10px 18px;border-radius:30px;font-size:13px;font-weight:600;
+    opacity:0;pointer-events:none;transition:opacity .25s;z-index:50;max-width:90%;text-align:center;
+  }
+  .toast.show{opacity:1;}
+  .center-icon{font-size:44px;text-align:center;margin:6px 0 14px;}
+  .divider{height:1px;background:var(--line);margin:18px 0;}
+  .small-muted{font-size:11.5px;color:var(--text-dim);}
+  .copybox{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:var(--font-mono);
+    font-size:12px;color:var(--text-dim);word-break:break-all;
+  }
+  .copybox button{flex-shrink:0;background:var(--amber);color:var(--amber-ink);border:none;border-radius:7px;padding:7px 10px;font-weight:700;font-size:11px;cursor:pointer;}
+
+  /* --- Movimiento: confeti, mascota y transiciones --- */
+  #confetti-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:80;}
+  .confetti-piece{position:absolute;top:-12px;width:7px;height:12px;border-radius:2px;will-change:transform,opacity;}
+  @keyframes confetti-fall{
+    0%{transform:translateY(-10vh) rotate(0deg);opacity:1;}
+    100%{transform:translateY(112vh) rotate(680deg);opacity:0;}
+  }
+  @keyframes bob{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-7px);}
+  }
+  .mascot-wrap{display:flex;justify-content:center;margin:2px 0 10px;}
+  .mascot{animation:bob 2.4s ease-in-out infinite;}
+  .mascot .eye{animation:blink 4.2s infinite;transform-origin:center;}
+  @keyframes blink{
+    0%,90%,100%{transform:scaleY(1);}
+    95%{transform:scaleY(.12);}
+  }
+  @keyframes pop-in{
+    0%{transform:scale(.55);opacity:0;}
+    65%{transform:scale(1.06);opacity:1;}
+    100%{transform:scale(1);}
+  }
+  .pop-in{animation:pop-in .38s cubic-bezier(.2,.9,.3,1.3) both;}
+  @keyframes trophy-bounce{
+    0%,100%{transform:translateY(0) rotate(0deg);}
+    25%{transform:translateY(-7px) rotate(-8deg);}
+    75%{transform:translateY(-3px) rotate(8deg);}
+  }
+  .trophy-bounce{display:inline-block;animation:trophy-bounce 1.5s ease-in-out infinite;}
+  .bar-fill{transition:width .7s cubic-bezier(.22,1,.36,1);}
+  .opt{transition:background .25s ease, border-color .25s ease, transform .15s ease;}
+  .opt.selected{transform:scale(.99);}
+  @keyframes dot-bounce{
+    0%,80%,100%{transform:translateY(0);opacity:.5;}
+    40%{transform:translateY(-5px);opacity:1;}
+  }
+  .dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin:0 2px;animation:dot-bounce 1.1s infinite ease-in-out;}
+  .dots span:nth-child(2){animation-delay:.15s;}
+  .dots span:nth-child(3){animation-delay:.3s;}
+</style>
+</head>
+<body>
+<div id="confetti-layer"></div>
+<div class="app" id="app">
+
+  <div class="brand">
+    <div class="brand-mark">fx</div>
+    <div class="brand-text">Reto de Celdas <span>· siembra saberes</span></div>
+  </div>
+
+  <!-- HOME -->
+  <div class="view active" id="view-home">
+    <div class="mascot-wrap">
+      <svg class="mascot" width="64" height="64" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="8" width="56" height="56" rx="14" fill="#1E2448" stroke="#FFB020" stroke-width="3"/>
+        <circle class="eye" cx="27" cy="32" r="4" fill="#F1F3FF"/>
+        <circle class="eye" cx="45" cy="32" r="4" fill="#F1F3FF"/>
+        <path d="M25 46 Q36 54 47 46" stroke="#FFB020" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <p class="eyebrow">Siembra saberes y conocimientos</p>
+    <h1>Retos por área y grado, en tiempo real.</h1>
+    <p class="lead">El docente inicia sesión y crea el reto; el estudiante entra con el código que se genera. Modo en vivo con ranking, o modo tarea con plazo.</p>
+
+    <div class="card" id="mode-banner" style="display:none; border-color:var(--amber)">
+      <p class="small-muted" style="margin:0"><b style="color:var(--amber)">Modo local de prueba.</b> Los estudiantes solo pueden unirse desde este mismo navegador. Para usarla en clase con celulares, configura Firebase (pasos en el README).</p>
+    </div>
+
+    <div class="card pop-in" id="active-session-card" style="display:none; border-color:var(--amber)">
+      <div class="row-between" style="margin-bottom:8px">
+        <span class="eyebrow" style="margin:0">Reto creado</span>
+        <span class="badge" style="font-family:var(--font-mono);font-weight:700;color:var(--amber);border-color:var(--amber)" id="active-session-code">----</span>
+      </div>
+      <p class="small-muted" id="active-session-title" style="margin-bottom:14px">—</p>
+      <div class="btn-row">
+        <button class="btn btn-violet" onclick="resumeTeacherPanel()">Panel del docente</button>
+        <button class="btn btn-ghost" onclick="quickJoinAsStudent()">Unirme como estudiante</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <button class="btn btn-primary" style="margin-bottom:10px" onclick="teacherEntry()">Soy docente — crear reto</button>
+      <button class="btn btn-ghost" onclick="go('view-student-join')">Soy estudiante — unirme con código</button>
+    </div>
+    <p class="small-muted" style="text-align:center">Funciona en el navegador de tu celular, tablet o computador. No necesitas instalar nada.</p>
+  </div>
+
+  <!-- TEACHER: LOGIN -->
+  <div class="view" id="view-teacher-login">
+    <button class="link-back" onclick="go('view-home')">‹ volver</button>
+    <p class="eyebrow">Docentes</p>
+    <h2 style="margin-bottom:18px">Ingresa a tu cuenta</h2>
+    <div class="card">
+      <div class="field"><label>Usuario</label><input type="text" id="t-user" autocomplete="username"></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="t-pass" autocomplete="current-password"></div>
+      <div class="field"><label>Clave de docentes (solo para crear cuenta)</label><input type="text" id="t-key"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="teacherAuth(false)">Entrar</button>
+        <button class="btn btn-ghost" onclick="teacherAuth(true)">Crear cuenta</button>
+      </div>
+      <p class="helptext" id="t-error" style="color:var(--bad)"></p>
+    </div>
+  </div>
+
+  <!-- TEACHER: CREATE -->
+  <div class="view" id="view-teacher-create">
+    <button class="link-back" onclick="state.teacher=null;go('view-home')">‹ cerrar sesión</button>
+    <p class="eyebrow">Nuevo reto · <span id="t-name"></span></p>
+    <h2 style="margin-bottom:18px">Configura la actividad</h2>
+
+    <div class="card">
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="in-title" value="Reto de saberes">
+      </div>
+      <div class="field"><label>Área</label><select id="in-area" onchange="fillSubj()"></select></div>
+      <div class="field"><label>Materia</label><select id="in-subj" onchange="updAvail()"></select></div>
+      <div class="field"><label>Grado</label><select id="in-grade" onchange="updAvail()"></select>
+        <p class="helptext" id="avail"></p></div>
+      <div class="field">
+        <label>Cantidad de preguntas</label>
+        <select id="in-qcount">
+          <option value="5">5 preguntas</option><option value="10">10 preguntas</option><option value="15">15 preguntas</option><option value="20" selected>20 preguntas</option>
+        </select>
+        <p class="helptext">Hasta 20 preguntas precargadas (se eligen al azar según materia y grado). Puedes sumar hasta 10 propias para llegar a 30.</p>
+      </div>
+      <div class="field">
+        <label>Modalidad</label>
+        <div class="seg" id="seg-mode">
+          <button data-v="vivo" class="active" onclick="pick('seg-mode',this)">En vivo</button>
+          <button data-v="tarea" onclick="pick('seg-mode',this)">Tarea (asíncrona)</button>
+        </div>
+        <p class="helptext" id="mode-help">Toda la clase juega al mismo tiempo, con ranking en pantalla.</p>
+      </div>
+      <div class="field" id="field-deadline" style="display:none">
+        <label>Cierra en (horas desde ahora)</label>
+        <input type="text" id="in-deadline" value="48">
+      </div>
+      <div class="field">
+        <label>Preguntas propias (opcional) · <span id="cq-count">0/10</span> cupos</label>
+        <input type="text" id="cq-text" placeholder="Enunciado de la pregunta" style="margin-bottom:6px">
+        <input type="text" id="cq-o0" placeholder="Opción A (la correcta)" style="margin-bottom:6px">
+        <input type="text" id="cq-o1" placeholder="Opción B" style="margin-bottom:6px">
+        <input type="text" id="cq-o2" placeholder="Opción C" style="margin-bottom:6px">
+        <input type="text" id="cq-o3" placeholder="Opción D" style="margin-bottom:8px">
+        <button class="btn btn-ghost" onclick="addCustom()">Agregar pregunta</button>
+        <p class="helptext">Escribe la correcta en la opción A: las opciones se barajan solas al agregarla.</p>
+        <div id="cq-list"></div>
+      </div>
+      <button class="btn btn-primary" onclick="createSession()">Crear reto y generar código</button>
+      <p class="helptext" id="create-error" style="color:var(--bad)"></p>
+    </div>
+  </div>
+
+  <!-- TEACHER: LOBBY (vivo) -->
+  <div class="view" id="view-teacher-lobby">
+    <div class="row-between">
+      <span class="badge" id="lobby-badge">Sala de espera</span>
+      <button class="link-back" style="margin:0" onclick="teacherExit()">salir</button>
+    </div>
+    <h2 id="lobby-title">—</h2>
+    <p class="lead" id="lobby-sub" style="margin-bottom:14px"></p>
+
+    <div class="cell-wrap">
+      <div class="cell-refs"><div class="col">A</div><div class="col">B</div><div class="col">C</div></div>
+      <div class="cell-row">
+        <div class="row-num">1</div>
+        <div class="cell-selected">
+          <div class="code-out" id="lobby-code">----</div>
+          <div class="cell-handle"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fx-bar"><b>fx</b> <span>código de acceso — compártelo con el grupo</span></div>
+    <div class="copybox">
+      <span id="lobby-link">enlace…</span>
+      <button onclick="copyLink()">Copiar</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="row-between" style="margin-bottom:8px">
+      <h2 style="font-size:15px">Estudiantes conectados</h2>
+      <span class="badge" id="lobby-count">0</span>
+    </div>
+    <div class="roster" id="lobby-roster"><span class="small-muted">Aún nadie se ha unido…</span></div>
+
+    <div style="margin-top:22px">
+      <button class="btn btn-primary" onclick="startLive()">Iniciar ronda en vivo</button>
+    </div>
+  </div>
+
+  <!-- TEACHER: LIVE CONTROL -->
+  <div class="view" id="view-teacher-live">
+    <div class="row-between">
+      <span class="badge live"><span class="dot"></span> En vivo</span>
+      <button class="link-back" style="margin:0" onclick="teacherExit()">salir</button>
+    </div>
+    <p class="qtag" id="live-qtag">—</p>
+    <h2 id="live-qtext" style="font-family:var(--font-display);font-size:18px;margin-bottom:14px">—</h2>
+
+    <div class="card">
+      <div class="row-between" style="margin-bottom:0">
+        <span class="small-muted">Respuestas recibidas</span>
+        <span class="badge" id="live-answered">0 / 0</span>
+      </div>
+    </div>
+
+    <div id="live-results-block" style="display:none">
+      <h2 style="font-size:14px;margin:14px 0 8px">% de acierto en esta pregunta</h2>
+      <div class="bar-cell" style="margin-bottom:16px">
+        <div class="bar-track"><div class="bar-fill" id="live-accuracy-bar" style="width:0%"></div></div>
+        <span class="small-muted" id="live-accuracy-num">0%</span>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-bottom:10px">
+      <button class="btn btn-ghost" onclick="revealAnswer()" id="btn-reveal">Mostrar respuesta</button>
+      <button class="btn btn-violet" onclick="nextQuestion()" id="btn-next">Siguiente pregunta</button>
+    </div>
+    <button class="btn btn-primary" onclick="finishSession()">Finalizar y ver informe</button>
+
+    <div class="divider"></div>
+    <h2 style="font-size:15px;margin-bottom:8px">Ranking en vivo</h2>
+    <div id="live-ranking"><span class="empty">Sin respuestas todavía.</span></div>
+  </div>
+
+  <!-- TEACHER: RESULTS -->
+  <div class="view" id="view-teacher-results">
+    <div class="row-between">
+      <span class="badge">Informe</span>
+      <button class="link-back" style="margin:0" onclick="go('view-home')">salir</button>
+    </div>
+    <h2 id="results-title">—</h2>
+    <p class="lead" id="results-sub"></p>
+
+    <div class="card">
+      <h2 style="font-size:14px;margin-bottom:10px">Ranking final</h2>
+      <div id="results-ranking"><span class="empty">Sin datos.</span></div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:14px;margin-bottom:10px">Desempeño por pregunta</h2>
+      <p class="small-muted" style="margin-bottom:10px">Ayuda a identificar qué tema requiere refuerzo.</p>
+      <table class="report" id="results-by-question"></table>
+    </div>
+
+    <button class="btn btn-ghost" onclick="go('view-home')">Volver al inicio</button>
+  </div>
+
+  <!-- STUDENT: JOIN -->
+  <div class="view" id="view-student-join">
+    <button class="link-back" onclick="go('view-home')">‹ volver</button>
+    <p class="eyebrow">Unirse al reto</p>
+    <h2 style="margin-bottom:18px">Ingresa con el código de tu docente</h2>
+    <div class="card">
+      <div class="field">
+        <label>Código</label>
+        <input type="text" id="join-code" class="mono" maxlength="5" placeholder="CÓDIGO">
+      </div>
+      <div class="field">
+        <label>Tu nombre</label>
+        <input type="text" id="join-name" placeholder="Nombre y apellido">
+      </div>
+      <button class="btn btn-primary" onclick="joinSession()">Entrar</button>
+      <p class="helptext" id="join-error" style="color:var(--bad)"></p>
+    </div>
+  </div>
+
+  <!-- STUDENT: WAITING -->
+  <div class="view" id="view-student-wait">
+    <div class="mascot-wrap">
+      <svg class="mascot" width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="8" width="56" height="56" rx="14" fill="#1E2448" stroke="#7C6CF0" stroke-width="3"/>
+        <circle class="eye" cx="27" cy="32" r="4" fill="#F1F3FF"/>
+        <circle class="eye" cx="45" cy="32" r="4" fill="#F1F3FF"/>
+        <path d="M27 47 Q36 43 47 47" stroke="#7C6CF0" stroke-width="3" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h2 style="text-align:center">Esperando a que el docente inicie <span class="dots"><span></span><span></span><span></span></span></h2>
+    <p class="lead" style="text-align:center" id="wait-sub">Mantén esta pantalla abierta.</p>
+    <div class="card">
+      <p class="small-muted" style="text-align:center">Sesión <b id="wait-code" style="color:var(--amber);font-family:var(--font-mono)"></b></p>
+    </div>
+    <button class="btn btn-ghost" onclick="go('view-home')">Salir</button>
+  </div>
+
+  <!-- STUDENT: LIVE QUESTION -->
+  <div class="view" id="view-student-question">
+    <div class="row-between">
+      <span class="badge live"><span class="dot"></span> En vivo</span>
+      <span class="badge" id="sq-progress">—</span>
+    </div>
+    <p class="qtag" id="sq-tag">—</p>
+    <div class="qtext" id="sq-text">—</div>
+    <div id="sq-options"></div>
+    <p class="empty" id="sq-waiting" style="display:none">Respuesta enviada. Esperando la siguiente pregunta…</p>
+  </div>
+
+  <!-- STUDENT: ASYNC (tarea) -->
+  <div class="view" id="view-student-async">
+    <div class="row-between">
+      <span class="badge" id="async-badge">Tarea</span>
+      <span class="badge" id="async-progress">—</span>
+    </div>
+    <p class="qtag" id="async-tag">—</p>
+    <div class="qtext" id="async-text">—</div>
+    <div id="async-options"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="asyncPrev()">Anterior</button>
+      <button class="btn btn-primary" onclick="asyncNext()" id="async-next-btn">Siguiente</button>
+    </div>
+  </div>
+
+  <!-- STUDENT: DONE -->
+  <div class="view" id="view-student-done">
+    <div class="center-icon" id="done-icon">🎉</div>
+    <h2 style="text-align:center" id="done-title">¡Listo!</h2>
+    <p class="lead" style="text-align:center" id="done-sub"></p>
+    <div class="card" style="text-align:center">
+      <p class="small-muted">Tu puntaje</p>
+      <div style="font-family:var(--font-mono);font-size:36px;font-weight:700;color:var(--amber)" id="done-score">0</div>
+    </div>
+    <div id="done-ranking-wrap" style="display:none">
+      <h2 style="font-size:15px;margin-bottom:8px">Ranking</h2>
+      <div id="done-ranking"></div>
+    </div>
+    <button class="btn btn-ghost" onclick="go('view-home')">Volver al inicio</button>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===============================================================
+   CONFIGURACIÓN  (lo único que tienes que editar)
+   ---------------------------------------------------------------
+   Pega aquí la URL de tu Realtime Database de Firebase, por ejemplo:
+     "https://mi-proyecto-default-rtdb.firebaseio.com"
+   Los pasos están en el archivo README.md.
+
+   Si la dejas vacía, la app funciona en MODO LOCAL DE PRUEBA:
+   todo se guarda en este navegador y solo se puede probar con
+   varias pestañas del mismo navegador (no conecta otros dispositivos).
+=============================================================== */
+const FIREBASE_URL = "https://reto-celdas-default-rtdb.firebaseio.com";
+
+/* Clave que los docentes necesitan UNA vez para crear su cuenta. Cámbiala. */
+const CLAVE_DOCENTES = "SIEMBRA2026";
+
+/* ---------------------------------------------------------------
+   BANCO DE PREGUNTAS
+--------------------------------------------------------------- */
+const QUESTIONS_9 = [
+  {tag:"SUMA", text:"¿Qué función debes usar para sumar el rango A1:A10?", opts:["=SUMA(A1:A10)","=PROMEDIO(A1:A10)","=CONTAR(A1:A10)","=MAX(A1:A10)"], correct:0},
+  {tag:"SUMA", text:"¿Cuál es el resultado de =SUMA(2,4,6)?", opts:["10","12","8","24"], correct:1},
+  {tag:"SUMA", text:"Si A1=10, A2=5 y A3=15, ¿qué devuelve =SUMA(A1:A3)?", opts:["25","30","15","20"], correct:1},
+  {tag:"SUMA", text:"¿Qué fórmula suma únicamente las celdas A1 y A5, sin incluir las de en medio?", opts:["=SUMA(A1:A5)","=SUMA(A1,A5)","=SUMA(A1;A5;)","=SUMA(A1-A5)"], correct:1},
+  {tag:"PROMEDIO", text:"¿Qué función calcula la media de un conjunto de celdas?", opts:["=CONTAR","=SUMA","=PROMEDIO","=MAX"], correct:2},
+  {tag:"PROMEDIO", text:"Si escribes =PROMEDIO(B2:B6), ¿qué obtienes?", opts:["La suma de esas 5 celdas","El valor más alto de esas celdas","La media (promedio) de esas 5 celdas","La cantidad de celdas con número"], correct:2},
+  {tag:"PROMEDIO", text:"El promedio de los valores 4, 8 y 12 es:", opts:["6","8","12","24"], correct:1},
+  {tag:"PROMEDIO", text:"\"Promedio\" en una hoja de cálculo es sinónimo estadístico de:", opts:["Mediana","Moda","Media aritmética","Desviación estándar"], correct:2},
+  {tag:"CONTAR", text:"¿Qué función cuenta cuántas celdas de un rango contienen números?", opts:["=CONTAR(rango)","=SUMA(rango)","=PROMEDIO(rango)","=SI(rango)"], correct:0},
+  {tag:"CONTAR", text:"CONTAR y CONTARA se diferencian en que…", opts:["Son exactamente iguales","CONTAR solo cuenta celdas con números; CONTARA cuenta celdas no vacías","CONTARA solo funciona con texto","CONTAR suma los valores"], correct:1},
+  {tag:"CONTAR", text:"Si el rango A1:A5 tiene 3 celdas con números y 2 vacías, ¿qué devuelve =CONTAR(A1:A5)?", opts:["2","3","5","0"], correct:1},
+  {tag:"CONTAR", text:"¿Qué función usarías para contar solo las celdas de un rango que contienen exactamente el valor 10?", opts:["=CONTAR.SI(rango;10)","=CONTAR(rango;10)","=SUMA.SI(rango;10)","=PROMEDIO.SI(rango;10)"], correct:0},
+  {tag:"SINTAXIS", text:"¿Con qué símbolo debe iniciar siempre una fórmula en la hoja de cálculo?", opts:["#","@","=","%"], correct:2},
+  {tag:"SINTAXIS", text:"Para referirte a un rango de celdas desde A1 hasta A5 escribes:", opts:["A1-A5","A1:A5","A1,A5","A1;A5"], correct:1},
+  {tag:"SINTAXIS", text:"¿Qué carácter separa los argumentos dentro de una función (configuración en español)?", opts:["Coma (,)","Punto y coma (;)","Dos puntos (:)","Guion (-)"], correct:1},
+  {tag:"SINTAXIS", text:"¿Cómo se llama la celda ubicada en la columna C, fila 4?", opts:["4C","C4","C-4","4-C"], correct:1},
+];
+
+const QUESTIONS_10 = [
+  {tag:"SI", text:"¿Qué hace la función SI en una hoja de cálculo?", opts:["Ordena los datos de mayor a menor","Evalúa una condición y devuelve un valor u otro según el resultado","Cuenta las celdas vacías","Crea automáticamente un gráfico"], correct:1},
+  {tag:"SI", text:"¿Cuál es la sintaxis correcta de la función SI?", opts:["=SI(condición; valor_si_verdadero; valor_si_falso)","=SI(valor_si_verdadero; condición)","=SI(rango; condición)","=SI(condición)"], correct:0},
+  {tag:"SI", text:"Con A1 = 7, ¿qué resultado da =SI(A1>=6;\"Aprobado\";\"Reprobado\")?", opts:["Reprobado","Aprobado","7","Error"], correct:1},
+  {tag:"SI", text:"¿Qué devuelve =SI(5>10;\"Sí\";\"No\")?", opts:["Sí","No","5","10"], correct:1},
+  {tag:"SI", text:"¿Cuántos argumentos necesita como mínimo la función SI para funcionar?", opts:["1","2","3","4"], correct:2},
+  {tag:"SI", text:"Con B2=\"No\", ¿qué devuelve =SI(B2=\"Sí\";10;0)?", opts:["10","0","\"Sí\"","\"No\""], correct:1},
+  {tag:"BUSCARV", text:"¿Para qué se usa principalmente la función BUSCARV?", opts:["Para sumar columnas completas","Para buscar un valor en la primera columna de una tabla y traer un dato de otra columna de esa fila","Para contar filas vacías","Para dar formato condicional"], correct:1},
+  {tag:"BUSCARV", text:"En BUSCARV, el último argumento (verdadero/falso) indica…", opts:["El color de la celda","Si la búsqueda debe ser exacta o aproximada","El número de columnas de la tabla","Si se ordena el resultado"], correct:1},
+  {tag:"BUSCARV", text:"¿Qué representa el segundo argumento de BUSCARV (matriz_buscar_en)?", opts:["El valor exacto que se busca","El rango o tabla donde se realiza la búsqueda","El número de la fila","El nombre de la hoja"], correct:1},
+  {tag:"BUSCARV", text:"Para que BUSCARV funcione correctamente, el valor que se busca debe estar en:", opts:["La última columna del rango","Cualquier columna, no importa cuál","La primera columna del rango","Una hoja distinta siempre"], correct:2},
+  {tag:"CONDICIONALES", text:"¿Qué función combinarías con SI para verificar varias condiciones a la vez?", opts:["SUMA","PROMEDIO","Y / O","CONTAR"], correct:2},
+  {tag:"CONDICIONALES", text:"¿Qué devuelve =Y(5>2;3>10)?", opts:["VERDADERO","FALSO","5","Error"], correct:1},
+  {tag:"CONDICIONALES", text:"¿Qué devuelve =O(5>2;3>10)?", opts:["VERDADERO","FALSO","5","Error"], correct:0},
+  {tag:"GRÁFICOS", text:"Para comparar visualmente el rendimiento de varios estudiantes, ¿qué elemento es más útil?", opts:["Un gráfico de barras/columnas","Una celda combinada","Un comentario","Un formato de moneda"], correct:0},
+  {tag:"GRÁFICOS", text:"¿Qué tipo de gráfico es más adecuado para mostrar la evolución de una nota a lo largo del tiempo?", opts:["Gráfico circular (torta)","Gráfico de líneas","Gráfico de dispersión sin conectar","Ninguno, mejor una tabla"], correct:1},
+  {tag:"GRÁFICOS", text:"Antes de insertar un gráfico, ¿qué debes hacer primero?", opts:["Elegir el color del gráfico","Seleccionar el rango de celdas con los datos a graficar","Imprimir la hoja","Cambiar el nombre de la hoja"], correct:1},
+];
+
+function questionsForLevel(level){ return level === "9" ? QUESTIONS_9 : QUESTIONS_10; }
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function pickQuestions(level, count){
+  const bank = questionsForLevel(level);
+  if(!count || count >= bank.length) return shuffleArray(bank);
+  return shuffleArray(bank).slice(0, count);
+}
+
+/* ---------------------------------------------------------------
+   ESTADO Y UTILIDADES
+--------------------------------------------------------------- */
+let state = {
+  role: null,          // 'teacher' | 'student'
+  code: null,
+  teacherPollTimer: null,
+  studentPollTimer: null,
+  studentId: null,      // nombre normalizado
+  studentName: null,
+  studentAnsweredIndex: -1,
+  asyncIndex: 0,
+  asyncChoices: [],
+  lastRenderedIndex: -1,
+  myCreatedCode: null,      // último código de reto creado en este dispositivo
+  myCreatedSummary: null
+};
+
+function $(id){ return document.getElementById(id); }
+function go(viewId){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  $(viewId).classList.add('active');
+  window.scrollTo(0,0);
+  if(viewId === 'view-home') refreshActiveSessionCard();
+}
+function refreshActiveSessionCard(){
+  const card = $('active-session-card');
+  if(state.myCreatedCode){
+    card.style.display = 'block';
+    $('active-session-code').textContent = state.myCreatedCode;
+    $('active-session-title').textContent = state.myCreatedSummary || '';
+  } else {
+    card.style.display = 'none';
+  }
+}
+async function resumeTeacherPanel(){
+  if(!state.myCreatedCode){ toast('Aún no has creado ningún reto.'); return; }
+  const code = state.myCreatedCode;
+  const sess = await loadSession(code);
+  if(!sess){ toast('No se encontró el reto. Puede que haya expirado.'); return; }
+  state.role = 'teacher'; state.code = code;
+
+  if(sess.status === 'lobby'){
+    $('lobby-code').textContent = sess.code;
+    $('lobby-title').textContent = sess.title;
+    $('lobby-sub').textContent = sessLabel(sess);
+    $('lobby-link').textContent = buildJoinLink(sess.code);
+    go('view-teacher-lobby');
+    startTeacherPoll();
+  } else if(sess.status === 'live'){
+    $('btn-reveal').style.display = sess.mode === 'tarea' ? 'none' : 'block';
+    $('btn-next').style.display = sess.mode === 'tarea' ? 'none' : 'block';
+    go('view-teacher-live');
+    startTeacherPoll();
+  } else if(sess.status === 'finished'){
+    const roster = await loadRoster(code);
+    const answers = await loadAnswers(code);
+    renderResults(sess, roster, answers);
+    go('view-teacher-results');
+  }
+}
+function quickJoinAsStudent(){
+  if(!state.myCreatedCode){ toast('Aún no has creado ningún reto.'); return; }
+  $('join-code').value = state.myCreatedCode;
+  $('join-error').textContent = '';
+  go('view-student-join');
+  $('join-name').focus();
+}
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function randomCode(){
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let c = "";
+  for(let i=0;i<4;i++) c += chars[Math.floor(Math.random()*chars.length)];
+  $('in-code').value = c;
+}
+function pick(segId, btn){
+  document.querySelectorAll('#'+segId+' button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(segId === 'seg-mode'){
+    const mode = btn.dataset.v;
+    $('field-deadline').style.display = mode === 'tarea' ? 'block' : 'none';
+    $('mode-help').textContent = mode === 'vivo'
+      ? 'Toda la clase juega al mismo tiempo, con ranking en pantalla.'
+      : 'Cada estudiante responde a su propio ritmo, antes de la fecha límite.';
+  }
+}
+function segValue(segId){
+  const b = document.querySelector('#'+segId+' button.active');
+  return b ? b.dataset.v : null;
+}
+function normName(n){ return (n||'').trim().toLowerCase().replace(/\s+/g,' '); }
+
+/* ---------------------------------------------------------------
+   CAPA DE DATOS
+   - Con FIREBASE_URL: base de datos en la nube, compartida entre dispositivos.
+   - Sin FIREBASE_URL: modo local (localStorage), solo para pruebas.
+   Estructura: /reto/sessions/CODIGO, /reto/roster/CODIGO/ESTUDIANTE,
+               /reto/answers/CODIGO/ESTUDIANTE
+   Cada estudiante escribe solo en su propio nodo, así que las respuestas
+   simultáneas no se pisan entre sí.
+--------------------------------------------------------------- */
+const USE_CLOUD = !!(FIREBASE_URL && FIREBASE_URL.trim());
+const DB_BASE = USE_CLOUD ? FIREBASE_URL.trim().replace(/\/+$/, '') : '';
+const LOCAL_KEY = 'reto-celdas-db-v1';
+
+// Firebase no admite . $ # [ ] / en las claves; también se escapan % y _ para evitar ambigüedades.
+function fbKey(s){
+  return String(s).replace(/[.$#\[\]\/%_]/g, c => '_' + c.charCodeAt(0).toString(16) + '_');
+}
+// Firebase puede devolver un arreglo como objeto {"0":..,"2":..} si tiene huecos.
+function toArr(v){
+  if(!v) return [];
+  if(Array.isArray(v)) return v;
+  const out = [];
+  Object.keys(v).forEach(k => { const i = parseInt(k, 10); if(!isNaN(i)) out[i] = v[k]; });
+  return out;
+}
+
+function localRead(){
+  try{ return JSON.parse(localStorage.getItem(LOCAL_KEY)) || {}; }catch(e){ return {}; }
+}
+function localWrite(tree){
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(tree));
+}
+
+async function dbGet(path){
+  if(USE_CLOUD){
+    const url = DB_BASE + '/reto/' + path.split('/').map(encodeURIComponent).join('/') + '.json';
+    const r = await fetch(url, {cache:'no-store'});
+    if(!r.ok) throw new Error('Error de base de datos (' + r.status + ')');
+    return await r.json();
+  }
+  let node = localRead();
+  for(const k of path.split('/')){
+    if(node === null || typeof node !== 'object') return null;
+    node = node[k];
+  }
+  return node === undefined ? null : node;
+}
+
+async function dbSet(path, value){
+  if(USE_CLOUD){
+    const url = DB_BASE + '/reto/' + path.split('/').map(encodeURIComponent).join('/') + '.json';
+    const r = await fetch(url, {method:'PUT', body: JSON.stringify(value)});
+    if(!r.ok) throw new Error('Error de base de datos (' + r.status + ')');
+    return;
+  }
+  const tree = localRead();
+  const keys = path.split('/');
+  let node = tree;
+  for(let i = 0; i < keys.length - 1; i++){
+    if(node[keys[i]] === undefined || node[keys[i]] === null || typeof node[keys[i]] !== 'object') node[keys[i]] = {};
+    node = node[keys[i]];
+  }
+  const last = keys[keys.length - 1];
+  if(value === null) delete node[last]; else node[last] = JSON.parse(JSON.stringify(value));
+  localWrite(tree);
+}
+
+const P = {
+  session: c => 'sessions/' + fbKey(c),
+  roster:  c => 'roster/'   + fbKey(c),
+  answers: c => 'answers/'  + fbKey(c)
+};
+
+async function saveSession(sess){
+  await dbSet(P.session(sess.code), sess);
+}
+async function loadSession(code){
+  const s = await dbGet(P.session(code));
+  if(!s) return null;
+  s.questions = toArr(s.questions).map(q => Object.assign({}, q, {opts: toArr(q.opts)}));
+  return s;
+}
+async function loadRoster(code){
+  return (await dbGet(P.roster(code))) || {};
+}
+async function saveRosterEntry(code, id, entry){
+  await dbSet(P.roster(code) + '/' + id, entry);
+}
+async function loadAnswers(code){
+  const all = (await dbGet(P.answers(code))) || {};
+  Object.keys(all).forEach(id => { all[id].answers = toArr(all[id].answers); });
+  return all;
+}
+async function saveAnswerItem(code, id, idx, item){
+  await dbSet(P.answers(code) + '/' + id + '/answers/' + idx, item);
+}
+async function saveAnswerRecord(code, id, record){
+  await dbSet(P.answers(code) + '/' + id, record);
+}
+async function resetRoomData(code){
+  await dbSet(P.roster(code), null);
+  await dbSet(P.answers(code), null);
+}
+
+/* ---------------------------------------------------------------
+   DOCENTE — CREAR SESIÓN
+--------------------------------------------------------------- */
+async function createSession(){
+  const title = $('in-title').value.trim() || "Reto de saberes";
+  const level = $('in-grade').value;
+  const mode = segValue('seg-mode');
+  const code = await freshCode();
+  if(code.length < 3){ $('create-error').textContent = "El código debe tener al menos 3 caracteres."; return; }
+
+  let existing;
+  try{ existing = await loadSession(code); }
+  catch(e){ $('create-error').textContent = "No se pudo conectar con la base de datos. Revisa tu conexión y la configuración."; return; }
+  if(existing && existing.status !== 'finished'){
+    $('create-error').textContent = "Ese código ya está en uso por un reto activo. Elige otro.";
+    return;
+  }
+  $('create-error').textContent = "";
+
+  const deadlineHours = mode === 'tarea' ? (parseFloat($('in-deadline').value) || 48) : null;
+  const qcount = parseInt($('in-qcount').value, 10);
+
+  const qs = buildQuestions(qcount);
+  if(!qs.length){ $('create-error').textContent = "No hay preguntas para esta selección. Escribe preguntas propias."; return; }
+  const session = {
+    code, title, level, mode, teacher: state.teacher || null, label: curLabel(),
+    status: 'lobby', // lobby -> live -> finished  (tarea usa 'live' directamente sin control de pregunta)
+    currentIndex: -1,
+    showAnswer: false,
+    createdAt: Date.now(),
+    deadline: deadlineHours ? Date.now() + deadlineHours*3600*1000 : null,
+    questions: qs
+  };
+  try{
+    if(mode === 'tarea') session.status = 'live';
+    await resetRoomData(code);
+    await saveSession(session);
+  }catch(e){
+    $('create-error').textContent = "No se pudo guardar el reto. Revisa tu conexión y la configuración.";
+    return;
+  }
+
+  state.myCreatedCode = code;
+  state.myCreatedSummary = title + " · " + level + "°" + " · " + (mode === 'vivo' ? "en vivo" : "tarea");
+  state.role = null; state.code = null;
+
+  // Limpiar el formulario para el próximo reto
+  state.custom = []; renderCustom();
+  $('create-error').textContent = '';
+
+  toast('Reto creado: ' + code);
+  resumeTeacherPanel();
+}
+
+function buildJoinLink(code){
+  const url = new URL(window.location.href);
+  url.searchParams.set('code', code);
+  url.searchParams.set('role', 'student');
+  return url.toString();
+}
+function copyLink(){
+  const text = $('lobby-link').textContent;
+  navigator.clipboard && navigator.clipboard.writeText(text).then(()=>toast('Enlace copiado')).catch(()=>toast('Copia manual: '+text));
+}
+
+function teacherExit(){
+  if(state.teacherPollTimer) clearInterval(state.teacherPollTimer);
+  state.role = null; state.code = null;
+  go('view-home');
+}
+
+function startTeacherPoll(){
+  if(state.teacherPollTimer) clearInterval(state.teacherPollTimer);
+  teacherTick();
+  state.teacherPollTimer = setInterval(teacherTick, 2200);
+}
+
+async function teacherTick(){
+  if(!state.code) return;
+  const sess = await loadSession(state.code);
+  if(!sess) return;
+  const roster = await loadRoster(state.code);
+  const answers = await loadAnswers(state.code);
+  const names = Object.keys(roster);
+
+  if(sess.status === 'lobby'){
+    $('lobby-count').textContent = names.length;
+    $('lobby-roster').innerHTML = names.length
+      ? names.map(n=>`<span class="chip">${escapeHtml(roster[n].name)}</span>`).join('')
+      : '<span class="small-muted">Aún nadie se ha unido…</span>';
+    return;
+  }
+
+  if(sess.status === 'live' && document.getElementById('view-teacher-live').classList.contains('active') === false && sess.mode === 'vivo'){
+    go('view-teacher-live');
+  }
+
+  if(sess.status === 'live' && sess.mode === 'vivo'){
+    renderTeacherLive(sess, roster, answers);
+  } else if(sess.status === 'live' && sess.mode === 'tarea'){
+    const completed = names.filter(n => answers[n] && answers[n].completed).length;
+    $('live-qtag').textContent = "TAREA ASÍNCRONA · vence " + new Date(sess.deadline).toLocaleString();
+    $('live-qtext').textContent = completed + " de " + names.length + " estudiantes han completado el reto.";
+    renderRankingInto('live-ranking', buildRanking(answers, roster));
+  } else if(sess.status === 'finished'){
+    const wasAlreadyThere = document.getElementById('view-teacher-results').classList.contains('active');
+    renderResults(sess, roster, answers);
+    go('view-teacher-results');
+    if(!wasAlreadyThere) launchConfetti(30);
+    clearInterval(state.teacherPollTimer);
+  }
+}
+
+function renderTeacherLive(sess, roster, answers){
+  const q = sess.questions[sess.currentIndex];
+  $('live-qtag').textContent = "Pregunta " + (sess.currentIndex+1) + " de " + sess.questions.length + " · " + q.tag;
+  $('live-qtext').textContent = q.text;
+
+  const names = Object.keys(roster);
+  const answeredCount = names.filter(n => answers[n] && answers[n].answers && answers[n].answers[sess.currentIndex]).length;
+  $('live-answered').textContent = answeredCount + " / " + names.length;
+
+  if(sess.showAnswer){
+    $('live-results-block').style.display = 'block';
+    let correctCount = 0;
+    names.forEach(n=>{
+      const a = answers[n] && answers[n].answers && answers[n].answers[sess.currentIndex];
+      if(a && a.correct) correctCount++;
+    });
+    const pct = answeredCount ? Math.round(100*correctCount/answeredCount) : 0;
+    $('live-accuracy-bar').style.width = pct + '%';
+    $('live-accuracy-num').textContent = pct + '% (' + correctCount + '/' + answeredCount + ')';
+  } else {
+    $('live-results-block').style.display = 'none';
+  }
+
+  $('btn-next').textContent = sess.currentIndex >= sess.questions.length - 1 ? "Última pregunta" : "Siguiente pregunta";
+  renderRankingInto('live-ranking', buildRanking(answers, roster));
+}
+
+async function revealAnswer(){
+  const sess = await loadSession(state.code);
+  if(!sess) return;
+  sess.showAnswer = true;
+  await saveSession(sess);
+  teacherTick();
+}
+
+async function nextQuestion(){
+  const sess = await loadSession(state.code);
+  if(!sess) return;
+  if(sess.currentIndex >= sess.questions.length - 1){
+    toast('Ya es la última pregunta. Puedes finalizar.');
+    return;
+  }
+  sess.currentIndex += 1;
+  sess.showAnswer = false;
+  await saveSession(sess);
+  teacherTick();
+}
+
+async function startLive(){
+  const sess = await loadSession(state.code);
+  if(!sess) return;
+  sess.status = 'live';
+  sess.currentIndex = 0;
+  sess.showAnswer = false;
+  await saveSession(sess);
+  go('view-teacher-live');
+  $('btn-reveal').style.display = 'block';
+  $('btn-next').style.display = 'block';
+  teacherTick();
+}
+
+async function finishSession(){
+  const sess = await loadSession(state.code);
+  if(!sess) return;
+  sess.status = 'finished';
+  await saveSession(sess);
+  const roster = await loadRoster(state.code);
+  const answers = await loadAnswers(state.code);
+  renderResults(sess, roster, answers);
+  go('view-teacher-results');
+  launchConfetti(30);
+  if(state.teacherPollTimer) clearInterval(state.teacherPollTimer);
+}
+
+function buildRanking(answers, roster){
+  return Object.keys(answers).map(n=>{
+    const rec = answers[n];
+    const score = (rec.answers||[]).filter(a=>a && a.correct).length;
+    return {name: (roster[n] && roster[n].name) || rec.name || n, score};
+  }).sort((a,b)=>b.score-a.score);
+}
+function renderRankingInto(elId, ranking){
+  const el = $(elId);
+  if(!ranking.length){ el.innerHTML = '<span class="empty">Sin respuestas todavía.</span>'; return; }
+  el.innerHTML = ranking.map((r,i)=>`
+    <div class="rank-item pop-in" style="animation-delay:${i*45}ms">
+      <div class="rank-num">${i === 0 ? '<span class=\"trophy-bounce\">🥇</span>' : (i+1)}</div>
+      <div class="rank-name">${escapeHtml(r.name)}</div>
+      <div class="rank-score">${r.score} pts</div>
+    </div>`).join('');
+}
+
+function renderResults(sess, roster, answers){
+  $('results-title').textContent = sess.title;
+  $('results-sub').textContent = sessLabel(sess) + " · " + Object.keys(roster).length + " participantes";
+  renderRankingInto('results-ranking', buildRanking(answers, roster));
+
+  const rows = sess.questions.map((q, idx)=>{
+    let total=0, correct=0;
+    Object.keys(answers).forEach(n=>{
+      const a = answers[n].answers && answers[n].answers[idx];
+      if(a){ total++; if(a.correct) correct++; }
+    });
+    const pct = total ? Math.round(100*correct/total) : 0;
+    return {tag:q.tag, text:q.text, pct, total};
+  });
+  const tbl = $('results-by-question');
+  tbl.innerHTML = '<tr><th>Tema</th><th>Acierto</th></tr>' + rows.map(r=>`
+    <tr>
+      <td><b>${escapeHtml(r.tag)}</b><br><span class="small-muted">${escapeHtml(r.text)}</span></td>
+      <td>
+        <div class="bar-cell">
+          <div class="bar-track"><div class="bar-fill" style="width:${r.pct}%; background:${r.pct<50?'var(--bad)':(r.pct<75?'var(--amber)':'var(--good)')}"></div></div>
+          <span class="small-muted">${r.pct}%</span>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function launchConfetti(count){
+  const layer = $('confetti-layer');
+  if(!layer) return;
+  count = count || 22;
+  const colors = ['#FFB020','#7C6CF0','#34D399','#FB6B6B','#F1F3FF'];
+  for(let i=0;i<count;i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = (Math.random()*100)+'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.borderRadius = Math.random() > .5 ? '2px' : '50%';
+    const duration = 1200 + Math.random()*900;
+    p.style.animation = 'confetti-fall ' + duration + 'ms ease-in forwards';
+    p.style.animationDelay = (Math.random()*220)+'ms';
+    layer.appendChild(p);
+    setTimeout(()=>p.remove(), duration + 400);
+  }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------------------------------------------------------------
+   ESTUDIANTE — UNIRSE
+--------------------------------------------------------------- */
+async function joinSession(){
+  const code = $('join-code').value.trim().toUpperCase();
+  const name = $('join-name').value.trim();
+  if(!code || !name){ $('join-error').textContent = "Escribe el código y tu nombre."; return; }
+
+  let sess;
+  try{ sess = await loadSession(code); }
+  catch(e){ $('join-error').textContent = "No se pudo conectar. Revisa tu conexión a internet e inténtalo de nuevo."; return; }
+  if(!sess){ $('join-error').textContent = "No encontramos un reto con ese código."; return; }
+  if(sess.status === 'finished'){ $('join-error').textContent = "Este reto ya finalizó."; return; }
+  $('join-error').textContent = "";
+
+  const id = fbKey(normName(name));
+  try{ await saveRosterEntry(code, id, {name, joinedAt: Date.now()}); }
+  catch(e){ $('join-error').textContent = "No se pudo registrar tu nombre. Inténtalo de nuevo."; return; }
+
+  state.role = 'student'; state.code = code; state.studentId = id; state.studentName = name;
+  state.studentAnsweredIndex = -1; state.lastRenderedIndex = -1;
+
+  if(sess.mode === 'tarea'){
+    state.asyncIndex = 0;
+    state.asyncChoices = new Array(sess.questions.length).fill(-1);
+    const answers = await loadAnswers(code);
+    if(answers[id] && answers[id].completed){
+      showStudentDone(sess, answers[id]);
+      return;
+    }
+    renderAsyncQuestion(sess);
+    go('view-student-async');
+    return;
+  }
+
+  if(sess.status === 'lobby'){
+    $('wait-code').textContent = code;
+    go('view-student-wait');
+  }
+  startStudentPoll();
+}
+
+function startStudentPoll(){
+  if(state.studentPollTimer) clearInterval(state.studentPollTimer);
+  studentTick();
+  state.studentPollTimer = setInterval(studentTick, 1800);
+}
+
+async function studentTick(){
+  if(!state.code || state.role !== 'student') return;
+  const sess = await loadSession(state.code);
+  if(!sess) return;
+
+  if(sess.mode === 'tarea') { clearInterval(state.studentPollTimer); return; }
+
+  if(sess.status === 'lobby'){
+    go('view-student-wait');
+    return;
+  }
+  if(sess.status === 'finished'){
+    const answers = await loadAnswers(state.code);
+    const roster = await loadRoster(state.code);
+    showStudentDone(sess, answers[state.studentId], answers, roster);
+    clearInterval(state.studentPollTimer);
+    return;
+  }
+  if(sess.status === 'live'){
+    if(sess.currentIndex !== state.lastRenderedIndex){
+      state.lastRenderedIndex = sess.currentIndex;
+      renderStudentLiveQuestion(sess);
+    }
+  }
+}
+
+function renderStudentLiveQuestion(sess){
+  const q = sess.questions[sess.currentIndex];
+  $('sq-progress').textContent = (sess.currentIndex+1)+" / "+sess.questions.length;
+  $('sq-tag').textContent = q.tag;
+  $('sq-text').textContent = q.text;
+  $('sq-waiting').style.display = 'none';
+  const wrap = $('sq-options');
+  wrap.innerHTML = '';
+  q.opts.forEach((opt, i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="k">${String.fromCharCode(65+i)}</span><span>${escapeHtml(opt)}</span>`;
+    b.onclick = ()=>submitLiveAnswer(sess, i, b);
+    wrap.appendChild(b);
+  });
+  go('view-student-question');
+}
+
+async function submitLiveAnswer(sess, choiceIndex, btn){
+  document.querySelectorAll('#sq-options .opt').forEach(o=>{ o.disabled = true; });
+  btn.classList.add('selected');
+  const q = sess.questions[sess.currentIndex];
+  const correct = choiceIndex === q.correct;
+
+  try{
+    await saveAnswerItem(state.code, state.studentId, sess.currentIndex,
+      {qIndex: sess.currentIndex, choice: choiceIndex, correct, ts: Date.now()});
+  }catch(e){
+    document.querySelectorAll('#sq-options .opt').forEach(o=>{ o.disabled = false; });
+    btn.classList.remove('selected');
+    toast('No se pudo enviar. Inténtalo de nuevo.');
+    return;
+  }
+
+  $('sq-waiting').style.display = 'block';
+  if(correct){ launchConfetti(16); }
+  toast(correct ? '¡Correcto!' : 'Respuesta enviada');
+}
+
+function showStudentDone(sess, myRecord, allAnswers, roster){
+  const score = myRecord ? (myRecord.answers||[]).filter(a=>a && a.correct).length : 0;
+  const total = sess.questions.length;
+  $('done-title').textContent = score === total ? "¡Puntaje perfecto!" : "¡Reto completado!";
+  $('done-sub').textContent = "Respondiste correctamente " + score + " de " + total + " preguntas.";
+  $('done-score').textContent = score + " / " + total;
+  $('done-icon').textContent = score === total ? "🏆" : "🎉";
+  $('done-icon').className = score === total ? "center-icon trophy-bounce" : "center-icon pop-in";
+
+  if(allAnswers && roster){
+    $('done-ranking-wrap').style.display = 'block';
+    renderRankingInto('done-ranking', buildRanking(allAnswers, roster));
+  } else {
+    $('done-ranking-wrap').style.display = 'none';
+  }
+  go('view-student-done');
+  if(score/total >= 0.6){ launchConfetti(score === total ? 34 : 20); }
+}
+
+/* ---------------------------------------------------------------
+   ESTUDIANTE — MODO TAREA (asíncrono)
+--------------------------------------------------------------- */
+let asyncSessionCache = null;
+
+function renderAsyncQuestion(sess){
+  asyncSessionCache = sess;
+  const idx = state.asyncIndex;
+  const q = sess.questions[idx];
+  $('async-badge').textContent = sess.deadline ? ("Vence " + new Date(sess.deadline).toLocaleDateString()) : "Tarea";
+  $('async-progress').textContent = (idx+1)+" / "+sess.questions.length;
+  $('async-tag').textContent = q.tag;
+  $('async-text').textContent = q.text;
+
+  const wrap = $('async-options');
+  wrap.innerHTML = '';
+  q.opts.forEach((opt,i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt' + (state.asyncChoices[idx] === i ? ' selected' : '');
+    b.innerHTML = `<span class="k">${String.fromCharCode(65+i)}</span><span>${escapeHtml(opt)}</span>`;
+    b.onclick = ()=>{ state.asyncChoices[idx] = i; renderAsyncQuestion(sess); };
+    wrap.appendChild(b);
+  });
+  $('async-next-btn').textContent = idx >= sess.questions.length - 1 ? "Enviar respuestas" : "Siguiente";
+}
+
+function asyncPrev(){
+  if(state.asyncIndex > 0){ state.asyncIndex--; renderAsyncQuestion(asyncSessionCache); }
+}
+
+async function asyncNext(){
+  const sess = asyncSessionCache;
+  if(state.asyncChoices[state.asyncIndex] === -1){ toast('Selecciona una opción antes de continuar.'); return; }
+  if(state.asyncIndex < sess.questions.length - 1){
+    state.asyncIndex++;
+    renderAsyncQuestion(sess);
+    return;
+  }
+  if(sess.deadline && Date.now() > sess.deadline){
+    toast('El plazo para esta tarea ya venció.');
+    return;
+  }
+  const recAnswers = sess.questions.map((q, i)=>({qIndex:i, choice: state.asyncChoices[i], correct: state.asyncChoices[i] === q.correct, ts: Date.now()}));
+  const record = {name: state.studentName, answers: recAnswers, completed: true};
+  try{ await saveAnswerRecord(state.code, state.studentId, record); }
+  catch(e){ toast('No se pudo enviar. Inténtalo de nuevo.'); return; }
+  showStudentDone(sess, record);
+}
+
+/* ---------------------------------------------------------------
+   INICIO — leer parámetros de enlace (?code=XXXX&role=student)
+--------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------
+   ÁREAS, BANCO DE PREGUNTAS POR ÁREA/MATERIA/GRADO Y CUENTAS DOCENTES
+   Para ampliar el banco agrega filas: [área, materia, gradoMin, gradoMax, pregunta, [opciones], índiceCorrecta]
+--------------------------------------------------------------- */
+const AREAS = [
+ {id:"nat", n:"Naturaleza, ciencia y producción", s:["Biología","Química"]},
+ {id:"ter", n:"Territorio y sociedad", s:["Ciencias Sociales","Historia","Valores éticos"]},
+ {id:"art", n:"Educación artística", s:["Arte y cultura"]},
+ {id:"rec", n:"Recreación y deporte", s:["Educación Física"]},
+ {id:"len", n:"Lenguaje y comunicación", s:["Lengua Castellana"]},
+ {id:"ext", n:"Lenguaje extranjero", s:["Inglés"]},
+ {id:"mat", n:"Lengua materna", s:["Jxukhthewe'sx Pthusenxi"]},
+ {id:"log", n:"Pensamiento lógico", s:["Aritmética","Álgebra","Trigonometría","Cálculo"]},
+ {id:"tec", n:"Tecnología e informática", s:["Sistemas"]}
+];
+const B = [
+ ["nat","Biología",6,11,"¿Qué organelo produce la mayor parte de la energía (ATP) de la célula?",["Ribosoma","Mitocondria","Núcleo","Lisosoma"],1],
+ ["nat","Biología",6,9,"¿Qué proceso realizan las plantas para producir su alimento usando la luz del sol?",["Respiración","Fotosíntesis","Digestión","Fermentación"],1],
+ ["nat","Biología",9,11,"La molécula que almacena la información genética es:",["Proteína","ADN","Glucosa","Lípido"],1],
+ ["nat","Química",8,11,"¿Cuál es el símbolo químico del sodio?",["So","Na","S","Sd"],1],
+ ["nat","Química",9,11,"Un pH menor que 7 indica una sustancia:",["Básica","Neutra","Ácida","Salina"],2],
+ ["nat","Química",9,11,"¿Cuántos electrones tiene un átomo neutro de carbono (Z = 6)?",["4","6","12","8"],1],
+ ["ter","Ciencias Sociales",6,8,"¿Cuál es la capital de Colombia?",["Medellín","Bogotá","Cali","Cartagena"],1],
+ ["ter","Ciencias Sociales",9,11,"Según la Constitución de 1991, Colombia es un Estado social de derecho organizado como república:",["Monárquica","Unitaria, con autonomía de sus entidades territoriales","Federal","Protectorado"],1],
+ ["ter","Historia",6,11,"El 20 de julio se conmemora el grito de independencia de:",["1810","1819","1830","1886"],0],
+ ["ter","Historia",8,11,"La Batalla de Boyacá, que selló la independencia de la Nueva Granada, ocurrió en:",["1810","1819","1821","1830"],1],
+ ["ter","Valores éticos",6,11,"Actuar con honestidad significa:",["Decir la verdad y obrar con rectitud","Buscar solo el beneficio propio","Evitar opinar","Obedecer sin pensar"],0],
+ ["ter","Valores éticos",6,11,"El respeto a la diversidad implica:",["Aceptar y valorar las diferencias entre personas","Que todos piensen igual","Ignorar a quien es distinto","Imponer las costumbres propias"],0],
+ ["art","Arte y cultura",6,11,"Los colores primarios en pintura tradicional son:",["Rojo, amarillo y azul","Verde, naranja y violeta","Blanco, negro y gris","Rojo, verde y negro"],0],
+ ["art","Arte y cultura",6,11,"El Museo del Oro, con su colección prehispánica, está en:",["Bogotá","Cali","Pasto","Tunja"],0],
+ ["rec","Educación Física",6,11,"¿Para qué sirve el calentamiento antes de hacer ejercicio?",["Preparar el cuerpo y prevenir lesiones","Cansarse más rápido","Reemplazar la hidratación","Solo para socializar"],0],
+ ["rec","Educación Física",6,11,"La capacidad física que permite movimientos de gran amplitud articular es:",["Fuerza","Flexibilidad","Resistencia","Velocidad"],1],
+ ["len","Lengua Castellana",6,11,"¿Cuál es un sinónimo de «efímero»?",["Eterno","Pasajero","Sólido","Antiguo"],1],
+ ["len","Lengua Castellana",6,9,"En «Los niños juegan», el sujeto es:",["juegan","Los niños","Los","No tiene"],1],
+ ["len","Lengua Castellana",6,11,"¿Cuál de estas palabras es esdrújula?",["camino","teléfono","canción","árbol"],1],
+ ["ext","Inglés",6,9,"Choose the correct form: She ___ to school every day.",["go","goes","going","gone"],1],
+ ["ext","Inglés",6,11,"What is the past tense of \"write\"?",["writed","wrote","written","writing"],1],
+ ["ext","Inglés",9,11,"The connector \"although\" expresses:",["Contrast","Addition","Time","Cause"],0],
+ ["log","Aritmética",6,9,"¿Cuál es el resultado de −7 + 12?",["−19","5","−5","19"],1],
+ ["log","Aritmética",6,9,"(−3) × (−4) =",["−12","12","−7","7"],1],
+ ["log","Aritmética",6,8,"0,5 + 0,25 =",["0,30","0,75","0,525","7,5"],1],
+ ["log","Álgebra",8,11,"Resuelve 2x + 6 = 14. El valor de x es:",["3","4","5","10"],1],
+ ["log","Álgebra",9,11,"Al factorizar x² − 9 se obtiene:",["(x − 3)(x + 3)","(x − 9)(x + 1)","(x − 3)²","x(x − 9)"],0],
+ ["log","Trigonometría",10,11,"sen 30° =",["1/2","√3/2","1","√2/2"],0],
+ ["log","Trigonometría",10,11,"En un triángulo rectángulo, tan θ es:",["cateto opuesto / cateto adyacente","cateto adyacente / hipotenusa","cateto opuesto / hipotenusa","hipotenusa / cateto opuesto"],0],
+ ["log","Cálculo",11,11,"La derivada de f(x) = x² es:",["x","2x","x²","2"],1],
+ ["log","Cálculo",11,11,"∫ 2x dx =",["x² + C","2x² + C","x + C","2 + C"],0]
+];
+const BANK = B.map(r => ({a:r[0], s:r[1], g:[r[2],r[3]], tag:r[1], text:r[4], opts:r[5], correct:r[6]}))
+  .concat(QUESTIONS_9.map(q => Object.assign({a:"tec", s:"Sistemas", g:[6,9]}, q)))
+  .concat(QUESTIONS_10.map(q => Object.assign({a:"tec", s:"Sistemas", g:[10,11]}, q)));
+state.custom = [];
+/* ---- Generadores de preguntas (20 por materia y grado, con números nuevos cada vez) ---- */
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const sup=n=>String(n).replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
+const sub=n=>String(n).replace(/\d/g,d=>'₀₁₂₃₄₅₆₇₈₉'[d]);
+const pw=n=>n===1?'':sup(n);
+const sg=b=>b<0?`− ${-b}`:`+ ${b}`;
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const near=a=>[a+1,a-1,a+2,a-2,a*2,-a];
+function mq(tag,text,ans,wrong){
+  ans=String(ans);
+  const w=[...new Set(wrong.map(String))].filter(x=>x!==ans);
+  let k=1; while(w.length<3){const c=isNaN(+ans)?ans+' ('+(k++)+')':String(+ans+k++); if(c!==ans&&!w.includes(c)) w.push(c);}
+  const o=shuffleArray([ans].concat(w.slice(0,3)));
+  return {tag,text,opts:o,correct:o.indexOf(ans)};
+}
+const dec=x=>x.toFixed(1).replace('.',',');
+function genArit(g){
+  const m=Math.max(1,g-5);
+  const T=[
+   ()=>{const a=R(-9*m,9*m),b=R(-9*m,9*m);return mq('ENTEROS',`¿Cuánto es ${a} + (${b})?`,a+b,near(a+b));},
+   ()=>{const a=R(-9*m,9*m),b=R(-9*m,9*m);return mq('ENTEROS',`¿Cuánto es (${a}) − (${b})?`,a-b,near(a-b));},
+   ()=>{const a=R(2,9+m),b=R(2,9+m);return mq('MULTIPLICACIÓN',`${a} × ${b} =`,a*b,near(a*b));},
+   ()=>{const b=R(2,9),q=R(2,10+3*m);return mq('DIVISIÓN',`${b*q} ÷ ${b} =`,q,near(q));},
+   ()=>{const p=[10,20,25,50][R(0,3)],n=R(1,20)*20;return mq('PORCENTAJE',`¿Cuánto es el ${p}% de ${n}?`,n*p/100,near(n*p/100));},
+   ()=>{const f=R(2,6),a=f*R(2,5),b=f*R(6,9),r=gcd(a,b);return mq('MCD',`¿Cuál es el máximo común divisor de ${a} y ${b}?`,r,[r*2,r+1,a+b,1]);},
+   ()=>{const a=R(2,9),b=R(2,9),l=a*b/gcd(a,b);return mq('MCM',`¿Cuál es el mínimo común múltiplo de ${a} y ${b}?`,l,[a*b+1,a+b,l*2,l+a]);},
+   ()=>{const b=R(2,5),e=R(2,4);return mq('POTENCIAS',`${b}${sup(e)} =`,b**e,[b*e,b+e,b**e+b,b**(e+1)]);},
+   ()=>{const r=R(3,12+m);return mq('RAÍCES',`√${r*r} =`,r,[r*r/2,r+1,r-1,2*r]);},
+   ()=>{const d=[5,7,11,13][R(0,3)],h=Math.floor(d/2),a=R(1,h),b=a%h+1+(R(0,1)&&h>2?(a+1)%h:0);if(b===a)b=a%h+1;return mq('FRACCIONES',`${a}/${d} + ${b}/${d} =`,`${a+b}/${d}`,[`${a+b}/${2*d}`,`${a*b}/${d}`,`${a+b}/${d+1}`]);},
+   ()=>{const x=R(11,99)/10,y=R(11,99)/10;return mq('DECIMALES',`${dec(x)} + ${dec(y)} =`,dec(x+y),[dec(x+y+.1),dec(x+y-.1),dec(x+y+1),dec(x*y)]);},
+   ()=>{const a=R(3,20),b=R(3,20);return mq('GEOMETRÍA',`¿Cuál es el perímetro de un rectángulo de ${a} cm por ${b} cm?`,2*(a+b),[a*b,a+b,2*a*b,2*(a+b)+2]);},
+   ()=>{const b=2*R(2,10),h=R(3,12);return mq('GEOMETRÍA',`¿Cuál es el área de un triángulo de base ${b} cm y altura ${h} cm?`,b*h/2,[b*h,b+h,b*h/2+h,2*b*h]);},
+   ()=>{const n=R(3,12),p=R(2,9)*500;return mq('PROBLEMAS',`Si un cuaderno cuesta $${p}, ¿cuánto cuestan ${n} cuadernos?`,'$'+n*p,['$'+(n*p+p),'$'+(n*p-p),'$'+(n+p),'$'+n*p*2]);},
+   ()=>{const k=R(2,5),p=R(2,9)*100,n=k+R(1,5);return mq('REGLA DE TRES',`Si ${k} lápices cuestan $${k*p}, ¿cuánto cuestan ${n} lápices?`,'$'+n*p,['$'+(n*p+p),'$'+(n*p-p),'$'+(k*p+n),'$'+n*k*p]);},
+   ()=>{const a=R(1,20),b=R(1,20);let c=R(1,20);c+=(3-(a+b+c)%3)%3;return mq('PROMEDIO',`¿Cuál es el promedio de ${a}, ${b} y ${c}?`,(a+b+c)/3,near((a+b+c)/3));},
+   ()=>{const a=R(2,9),b=R(2,9),c=R(2,9);return mq('OPERACIONES',`${a} + ${b} × ${c} =`,a+b*c,[(a+b)*c,a*b+c,a+b+c,a*b*c]);},
+   ()=>{const p=[11,13,17,19,23,29,31,37][R(0,7)],c=shuffleArray([15,21,27,33,35,39,51,57]).slice(0,3);return mq('PRIMOS','¿Cuál de estos números es primo?',p,c);},
+   ()=>{const f=[[1,2,'0,5'],[1,4,'0,25'],[3,4,'0,75'],[1,5,'0,2'],[3,5,'0,6'],[1,8,'0,125']][R(0,5)];return mq('FRACCIONES',`La fracción ${f[0]}/${f[1]} equivale a:`,f[2],['0,1','1,5','0,3','0,35','0,45']);},
+   ()=>{const k=R(2,5),p=[[2,3],[3,4],[2,5],[3,5]][R(0,3)];return mq('FRACCIONES',`La fracción ${k*p[0]}/${k*p[1]} simplificada es:`,`${p[0]}/${p[1]}`,[`${p[1]}/${p[0]}`,`${p[0]}/${k*p[1]}`,`${k*p[0]}/${p[1]}`]);}
+  ];
+  return T.map(f=>f());
+}
+function genAlg(g){
+  const T=[
+   ()=>{const a=R(2,9),x=R(-8,12),b=R(-9,9);return mq('ECUACIONES',`Resuelve ${a}x ${sg(b)} = ${a*x+b}. El valor de x es:`,x,near(x));},
+   ()=>{const a=R(2,9),b=R(-9,9),x=R(-5,9);return mq('EVALUAR',`Si x = ${x}, ¿cuánto vale ${a}x ${sg(b)}?`,a*x+b,near(a*x+b));},
+   ()=>{const a=R(2,9),b=a+R(1,3);return mq('TÉRMINOS SEMEJANTES',`Al reducir ${a}x + ${b}x se obtiene:`,`${a+b}x`,[`${a*b}x`,`${a+b}x²`,`${a+b}`]);},
+   ()=>{const a=R(3,9);return mq('PRODUCTOS NOTABLES',`(x + ${a})² =`,`x² + ${2*a}x + ${a*a}`,[`x² + ${a*a}`,`x² + ${a}x + ${a*a}`,`x² + ${2*a}x + ${2*a}`]);},
+   ()=>{const a=R(3,9);return mq('PRODUCTOS NOTABLES',`(x + ${a})(x − ${a}) =`,`x² − ${a*a}`,[`x² + ${a*a}`,`x² − ${2*a}x`,`x² − ${a}`]);},
+   ()=>{const a=R(3,9);return mq('FACTORIZACIÓN',`Al factorizar x² − ${a*a} se obtiene:`,`(x − ${a})(x + ${a})`,[`(x − ${a})²`,`(x − ${a*a})(x + 1)`,`x(x − ${a})`]);},
+   ()=>{const a=R(3,9);return mq('ECUACIONES',`Las soluciones de x² = ${a*a} son:`,`x = ${a} o x = −${a}`,[`x = ${a}`,`x = ${a*a}`,`x = ${2*a}`]);},
+   ()=>{const m=R(-5,5)||1,x1=R(0,4),x2=x1+R(1,4),y1=R(-5,5);return mq('FUNCIÓN LINEAL',`¿Cuál es la pendiente de la recta que pasa por (${x1}, ${y1}) y (${x2}, ${y1+m*(x2-x1)})?`,m,near(m));},
+   ()=>{const m=R(2,6),b=m+R(1,3);return mq('FUNCIÓN LINEAL',`En y = ${m}x + ${b}, ¿en qué punto corta la recta al eje y?`,`(0, ${b})`,[`(0, ${m})`,`(${b}, 0)`,`(0, −${b})`]);},
+   ()=>{const x=R(2,9),y=R(1,x-1);return mq('SISTEMAS',`Si x + y = ${x+y} y x − y = ${x-y}, ¿cuánto vale x?`,x,[y,x+y,x-y,x+1]);},
+   ()=>{const a=R(2,9),b=R(10,20);return mq('DESIGUALDADES',`Resuelve x + ${a} > ${b}:`,`x > ${b-a}`,[`x < ${b-a}`,`x > ${b+a}`,`x < ${b+a}`]);},
+   ()=>{const a=R(2,6),b=a+R(1,4);return mq('FACTORIZACIÓN',`Al factorizar ${a}x + ${a*b} se obtiene:`,`${a}(x + ${b})`,[`${a}(x + ${a*b})`,`x(${a} + ${b})`,`${b}(x + ${a})`]);},
+   ()=>{const a=R(2,6),b=R(2,6);return mq('EXPONENTES',`x${sup(a)} · x${sup(b)} =`,`x${sup(a+b)}`,[`x${sup(a*b+a+b)}`,`2x${sup(a+b)}`,`x${sup(a+b+1)}`]);},
+   ()=>{const b=R(2,4),a=b+R(1,4);return mq('EXPONENTES',`x${sup(a)} ÷ x${sup(b)} =`,`x${pw(a-b)}`,[`x${pw(a+b)}`,`x${pw(a*b+a)}`,`x${pw(a-b+1)}`]);},
+   ()=>{const b=R(1,9),k=R(2,6);return mq('FUNCIONES',`Si f(x) = x² ${sg(b)}, ¿cuánto vale f(${k})?`,k*k+b,[k*2+b,k*k-b,(k+b)**2,k+b]);},
+   ()=>{const a=R(2,6),b=R(1,9);return mq('DESPEJE',`Al despejar x en y = ${a}x + ${b} se obtiene:`,`x = (y − ${b}) / ${a}`,[`x = (y + ${b}) / ${a}`,`x = ${a}(y − ${b})`,`x = y/${a} + ${b}`]);},
+   ()=>{const p=R(1,5),q=p+R(1,4);return mq('ECUACIONES CUADRÁTICAS',`Las raíces de (x + ${p})(x + ${q}) = 0 son:`,`x = −${p} y x = −${q}`,[`x = ${p} y x = ${q}`,`x = ${p+q}`,`x = ${p*q}`]);},
+   ()=>{const a=R(1,3),b=R(-6,6),c=R(-4,4);return mq('ECUACIONES CUADRÁTICAS',`El discriminante de ${a===1?'':a}x² ${sg(b)}x ${sg(c)} = 0 es:`,b*b-4*a*c,[b*b+4*a*c,4*a*c-b*b,b*b-2*a*c,b*b-4*a*c+2]);},
+   ()=>{const a=R(1,3),h=R(1,4)*(R(0,1)?1:-1),b=-2*a*h;return mq('PARÁBOLAS',`¿Cuál es la coordenada x del vértice de y = ${a===1?'':a}x² ${sg(b)}x + 1?`,h,[-h,2*h,h+1,h-1]);},
+   ()=>{const b=[2,3,5][R(0,2)],n=R(2,4);return mq('LOGARITMOS',`log${sub(b)}(${b**n}) =`,n,[n+1,n-1,b*n,b]);}
+  ];
+  const list = g<10 ? T.slice(0,17).concat([T[0],T[9],T[10]]) : T;
+  return list.map(f=>f());
+}
+function genTrig(g){
+  const V={sen:{0:'0',30:'1/2',45:'√2/2',60:'√3/2',90:'1'},cos:{0:'1',30:'√3/2',45:'√2/2',60:'1/2',90:'0'},tan:{30:'√3/3',45:'1',60:'√3'}};
+  const POOL=['0','1/2','√2/2','√3/2','1','√3/3','√3'];
+  const val=(f)=>()=>{const as=Object.keys(V[f]),a=as[R(0,as.length-1)],r=V[f][a];return mq('ÁNGULOS NOTABLES',`${f} ${a}° =`,r,shuffleArray(POOL.filter(x=>x!==r)));};
+  const RD=[[30,'π/6'],[45,'π/4'],[60,'π/3'],[90,'π/2'],[120,'2π/3'],[180,'π'],[270,'3π/2'],[360,'2π']];
+  const TR=[[3,4,5],[5,12,13],[8,15,17],[7,24,25],[6,8,10]];
+  const tr=()=>TR[R(0,4)];
+  const T=[ val('sen'),val('cos'),val('tan'),
+   ()=>{const p=RD[R(0,7)];return mq('RADIANES',`${p[0]}° equivale a:`,p[1],RD.map(x=>x[1]));},
+   ()=>{const p=RD[R(0,7)];return mq('RADIANES',`${p[1]} rad equivale a:`,p[0]+'°',RD.map(x=>x[0]+'°'));},
+   ()=>{const t=tr();return mq('PITÁGORAS',`Un triángulo rectángulo tiene catetos de ${t[0]} y ${t[1]}. ¿Cuánto mide la hipotenusa?`,t[2],[t[0]+t[1],t[2]+1,t[2]-1,t[1]*2]);},
+   ()=>{const t=tr();return mq('PITÁGORAS',`Un triángulo rectángulo tiene hipotenusa ${t[2]} y un cateto de ${t[0]}. ¿Cuánto mide el otro cateto?`,t[1],[t[2]-t[0],t[1]+1,t[1]-1,t[2]+t[0]]);},
+   ()=>{const t=tr();return mq('RAZONES',`En un triángulo rectángulo con catetos ${t[0]} y ${t[1]} e hipotenusa ${t[2]}, sen del ángulo opuesto al cateto ${t[0]} es:`,`${t[0]}/${t[2]}`,[`${t[1]}/${t[2]}`,`${t[0]}/${t[1]}`,`${t[2]}/${t[0]}`]);},
+   ()=>{const t=tr();return mq('RAZONES',`En un triángulo rectángulo con catetos ${t[0]} y ${t[1]} e hipotenusa ${t[2]}, cos del ángulo opuesto al cateto ${t[0]} es:`,`${t[1]}/${t[2]}`,[`${t[0]}/${t[2]}`,`${t[1]}/${t[0]}`,`${t[2]}/${t[1]}`]);},
+   ()=>{const t=tr();return mq('RAZONES',`En un triángulo rectángulo con catetos ${t[0]} y ${t[1]}, tan del ángulo opuesto al cateto ${t[0]} es:`,`${t[0]}/${t[1]}`,[`${t[1]}/${t[0]}`,`${t[0]}/${t[2]}`,`${t[2]}/${t[0]}`]);},
+   ()=>mq('IDENTIDADES','sen²θ + cos²θ =','1',['0','2','tan θ']),
+   ()=>mq('IDENTIDADES','tan θ es igual a:','sen θ / cos θ',['cos θ / sen θ','sen θ · cos θ','1 / sen θ']),
+   ()=>mq('IDENTIDADES','sec θ es igual a:','1 / cos θ',['1 / sen θ','cos θ / sen θ','sen θ / cos θ']),
+   ()=>{const p=[[120,'II'],[210,'III'],[300,'IV'],[45,'I']][R(0,3)];return mq('CUADRANTES',`¿En qué cuadrante está un ángulo de ${p[0]}°?`,p[1],['I','II','III','IV']);},
+   ()=>{const x=R(10,80);if(x===45)return mq('ÁNGULOS','¿Cuál es el complemento de un ángulo de 30°?','60°',['150°','30°','120°']);return mq('ÁNGULOS',`¿Cuál es el complemento de un ángulo de ${x}°?`,(90-x)+'°',[(180-x)+'°',x+'°',(90+x)+'°']);},
+   ()=>{const a=R(30,80),b=R(30,70);if(a+b===90)return mq('ÁNGULOS','En un triángulo, dos ángulos miden 50° y 60°. ¿Cuánto mide el tercero?','70°',['120°','310°','110°']);return mq('ÁNGULOS',`En un triángulo, dos ángulos miden ${a}° y ${b}°. ¿Cuánto mide el tercero?`,(180-a-b)+'°',[(360-a-b)+'°',(90-a)+'°',(a+b)+'°']);},
+   ()=>{const h=R(3,12);return mq('APLICACIONES',`Un poste proyecta una sombra de ${h} m cuando el sol forma 45° con el suelo. ¿Cuánto mide el poste?`,h+' m',[2*h+' m',h/2+' m',h+'√2 m']);},
+   ()=>{const r=R(3,9),t=R(2,4);return mq('APLICACIONES',`Un arco tiene radio ${r} cm y ángulo central de ${t} rad. ¿Cuál es su longitud?`,r*t+' cm',[(r*t+1)+' cm',(r*t+r)+' cm',(r*t-1)+' cm']);},
+   ()=>mq('FUNCIONES TRIGONOMÉTRICAS','El período de y = sen x es:','2π',['π','π/2','4π']),
+   ()=>{const a=R(2,6);return mq('FUNCIONES TRIGONOMÉTRICAS',`La amplitud de y = ${a} sen x es:`,a,[a*2,1,a+1]);}
+  ];
+  return T.map(f=>f());
+}
+function genCalc(g){
+  const T=[
+   ()=>{const n=R(2,6);return mq('DERIVADAS',`d/dx (x${sup(n)}) =`,`${n}x${pw(n-1)}`,[`x${pw(n+1)}`,`${n-1}x${pw(n)}`,`${n}x${pw(n)}`]);},
+   ()=>{const a=R(2,5),n=R(2,5);return mq('DERIVADAS',`d/dx (${a}x${sup(n)}) =`,`${a*n}x${pw(n-1)}`,[`${a}x${pw(n-1)}`,`${a*n}x${pw(n)}`,`${a*n+1}x${pw(n-1)}`]);},
+   ()=>{const c=R(2,9);return mq('DERIVADAS',`d/dx (${c}) =`,'0',[String(c),'1','x']);},
+   ()=>mq('DERIVADAS','d/dx (sen x) =','cos x',['−cos x','−sen x','tan x']),
+   ()=>mq('DERIVADAS','d/dx (cos x) =','−sen x',['sen x','−cos x','tan x']),
+   ()=>mq('DERIVADAS','d/dx (eˣ) =','eˣ',['x·eˣ⁻¹','ln x','1']),
+   ()=>mq('DERIVADAS','d/dx (ln x) =','1/x',['x','ln x / x','eˣ']),
+   ()=>{const a=R(1,5),b=R(-6,6)||2,c=R(1,9);return mq('DERIVADAS',`Si f(x) = ${a===1?'':a}x² ${sg(b)}x ${sg(c)}, entonces f'(x) =`,`${2*a}x ${sg(b)}`,[`${a}x ${sg(b)}`,`${2*a}x ${sg(b)} ${sg(c)}`,`${2*a}x² ${sg(b)}x`]);},
+   ()=>{const k=R(1,9);return mq('DERIVADAS',`¿Cuál es la pendiente de la tangente a y = x² en x = ${k}?`,2*k,[k,k*k,2*k+1]);},
+   ()=>{const n=R(1,5);return mq('INTEGRALES',`∫ x${pw(n)} dx =`,`x${sup(n+1)}/${n+1} + C`,[`x${pw(n-1)} + C`,`${n}x${pw(n-1)} + C`,`x${sup(n+1)} + C`]);},
+   ()=>{const a=R(2,9);return mq('INTEGRALES',`∫ ${a} dx =`,`${a}x + C`,[`${a} + C`,`x + C`,`${a}x² + C`]);},
+   ()=>mq('INTEGRALES','∫ sen x dx =','−cos x + C',['cos x + C','−sen x + C','tan x + C']),
+   ()=>mq('INTEGRALES','∫ cos x dx =','sen x + C',['−sen x + C','cos x + C','−cos x + C']),
+   ()=>{const k=R(2,9);return mq('INTEGRALES',`∫₀${sup(k)} 2x dx =`,k*k,[k,2*k,k*k+1]);},
+   ()=>{const a=R(2,9);return mq('LÍMITES',`lím (x → ${a}) (x² − ${a*a}) / (x − ${a}) =`,2*a,[a,a*a,0]);},
+   ()=>{const a=R(2,6),b=R(1,9),k=R(1,6);return mq('LÍMITES',`lím (x → ${k}) (${a}x + ${b}) =`,a*k+b,[a*k,a+b+k,a*k+b+1]);},
+   ()=>{const a=R(1,9);return mq('OPTIMIZACIÓN',`La función f(x) = x² − ${2*a}x tiene su punto crítico en x =`,a,[2*a,-a,a*a]);},
+   ()=>{const a=R(1,5);return mq('DERIVADAS',`Si f(x) = ${a===1?'':a}x³, entonces f''(x) =`,`${6*a}x`,[`${3*a}x²`,`${6*a}`,`${a}x`]);},
+   ()=>{const k=[3,6][R(0,1)];return mq('INTEGRALES',`∫₀${sup(k)} x² dx =`,k**3/3,[k*k,k**3,k**3/3+1]);},
+   ()=>mq('DERIVADAS','Si f\'(x) = 0 en un punto, ese punto es:','Un punto crítico (posible máximo, mínimo o inflexión)',['Siempre un máximo','Siempre una raíz de f','Un punto de discontinuidad'])
+  ];
+  return T.map(f=>f());
+}
+const GEN = {"Aritmética":[6,9,genArit],"Álgebra":[8,11,genAlg],"Trigonometría":[10,11,genTrig],"Cálculo":[11,11,genCalc]};
+/* ---- Banco por materia (formato: 'pregunta|correcta|incorrecta|incorrecta|incorrecta'; las opciones se barajan al cargar) ---- */
+function addBank(a,s,rows){ rows.forEach(r=>{ const p=r.split('|'), o=shuffleArray(p.slice(1)); BANK.push({a:a,s:s,g:[6,11],tag:s,text:p[0],opts:o,correct:o.indexOf(p[1])}); }); }
+addBank('nat','Biología',[
+'¿Cuál es la unidad básica de los seres vivos?|La célula|El tejido|El órgano|La molécula',
+'¿Qué estructura de la célula contiene el ADN y controla sus actividades?|Núcleo|Membrana|Vacuola|Ribosoma',
+'Los organismos que producen su propio alimento se llaman:|Autótrofos|Heterótrofos|Descomponedores|Parásitos',
+'¿Qué gas absorben las plantas para realizar la fotosíntesis?|Dióxido de carbono|Oxígeno|Nitrógeno|Hidrógeno',
+'¿Qué sistema transporta la sangre por todo el cuerpo?|Circulatorio|Digestivo|Excretor|Nervioso',
+'¿Qué órgano bombea la sangre?|Corazón|Pulmón|Hígado|Riñón',
+'En una cadena alimenticia, un herbívoro es un:|Consumidor primario|Productor|Descomponedor|Consumidor terciario',
+'¿Cuántos cromosomas tiene una célula humana normal?|46|23|48|44',
+'La división de una célula en dos células hijas idénticas se llama:|Mitosis|Meiosis|Ósmosis|Fotosíntesis',
+'Los glóbulos rojos se encargan principalmente de transportar:|Oxígeno|Anticuerpos|Hormonas|Vitaminas',
+'Las células que NO tienen un núcleo definido se llaman:|Procariotas|Eucariotas|Animales|Vegetales',
+'El conjunto de individuos de la misma especie que viven en un lugar es una:|Población|Comunidad|Biosfera|Cadena trófica',
+'¿Quién propuso la teoría de la evolución por selección natural?|Charles Darwin|Gregor Mendel|Louis Pasteur|Robert Hooke',
+'Gregor Mendel es considerado el padre de:|La genética|La ecología|La citología|La anatomía',
+'¿Qué orgánulo de la célula vegetal realiza la fotosíntesis?|Cloroplasto|Mitocondria|Lisosoma|Aparato de Golgi',
+'Los mamíferos se caracterizan por:|Alimentar a sus crías con leche|Poner huevos con cáscara|Respirar por branquias|Tener sangre fría',
+'La pérdida de agua de las plantas por las hojas se llama:|Transpiración|Germinación|Polinización|Fecundación',
+'Un ecosistema está formado por:|Seres vivos y su entorno físico|Solo animales|Solo plantas|Solo microorganismos',
+'La relación en la que ambas especies se benefician se llama:|Mutualismo|Parasitismo|Depredación|Competencia',
+'Los alimentos que aportan principalmente energía son los:|Carbohidratos|Minerales|Vitaminas|Fibras']);
+addBank('nat','Química',[
+'Los tres estados de agregación más comunes de la materia son:|Sólido, líquido y gaseoso|Frío, tibio y caliente|Denso, ligero y medio|Ácido, base y sal',
+'¿Cuál es el símbolo químico del oxígeno?|O|Ox|Og|Oy',
+'¿Cuál es la fórmula química del agua?|H₂O|HO₂|H₂O₂|OH',
+'¿Qué partícula del átomo tiene carga negativa?|Electrón|Protón|Neutrón|Núcleo',
+'El número atómico de un elemento indica la cantidad de:|Protones|Neutrones|Capas|Moléculas',
+'El cambio de estado de sólido a líquido se llama:|Fusión|Evaporación|Condensación|Sublimación',
+'¿Cuál es un ejemplo de mezcla homogénea?|Agua con sal disuelta|Arena con agua|Aceite con agua|Una ensalada',
+'¿Cuál es el símbolo químico del hierro?|Fe|Hi|Ir|Fr',
+'¿Cuál es el gas más abundante en la atmósfera terrestre?|Nitrógeno|Oxígeno|Dióxido de carbono|Argón',
+'¿Cuál es el elemento químico más ligero?|Hidrógeno|Helio|Litio|Oxígeno',
+'Una sustancia con pH igual a 7 es:|Neutra|Ácida|Básica|Corrosiva',
+'¿Cuál es el símbolo químico del oro?|Au|Ag|Or|Go',
+'Los gases nobles se caracterizan por ser:|Muy poco reactivos|Muy reactivos|Metales líquidos|Siempre sólidos',
+'Para que ocurra una combustión se necesita combustible y:|Oxígeno|Nitrógeno|Helio|Argón',
+'La tabla periódica ordena los elementos según su:|Número atómico creciente|Orden alfabético|Color|Densidad',
+'La sal común (NaCl) se llama químicamente:|Cloruro de sodio|Cloruro de potasio|Carbonato de sodio|Sulfato de sodio',
+'El enlace en el que los átomos comparten electrones es el:|Covalente|Iónico|Metálico|Nuclear',
+'¿Cuál de estas sustancias es un ácido?|Ácido clorhídrico (HCl)|Hidróxido de sodio|Agua destilada|Cloruro de sodio',
+'Según Lavoisier, en una reacción química la masa total:|Se conserva|Aumenta|Disminuye|Desaparece',
+'¿Qué elemento tiene el símbolo K?|Potasio|Calcio|Kriptón|Carbono']);
+addBank('ter','Ciencias Sociales',[
+'Colombia está ubicada en:|El noroccidente de Suramérica|Centroamérica|Norteamérica|El sur de Suramérica',
+'La cordillera de los Andes en Colombia se divide en:|Occidental, Central y Oriental|Norte, Centro y Sur|Alta, Media y Baja|Pacífica, Caribe y Andina',
+'¿Cuál es el río más importante de Colombia?|Magdalena|Amazonas|Orinoco|Atrato',
+'¿Cuántas regiones naturales tiene Colombia?|6|4|8|5',
+'Los mares y océanos que bañan Colombia son:|Mar Caribe y océano Pacífico|Océano Índico y Pacífico|Océano Ártico y Atlántico|Solo el Pacífico',
+'¿Qué rama del poder público hace las leyes?|Legislativa|Ejecutiva|Judicial|Electoral',
+'El presidente de la República pertenece a la rama:|Ejecutiva|Legislativa|Judicial|Electoral',
+'El mecanismo con el que los ciudadanos eligen a sus gobernantes es:|El voto|El decreto|La tutela|La sentencia',
+'La acción de tutela sirve para:|Proteger derechos fundamentales|Cobrar impuestos|Elegir alcaldes|Declarar la guerra',
+'La línea imaginaria que divide la Tierra en hemisferio norte y sur es:|El Ecuador|El meridiano de Greenwich|El trópico de Cáncer|El círculo polar',
+'El movimiento de la Tierra alrededor del Sol se llama:|Traslación|Rotación|Nutación|Precesión',
+'El movimiento de rotación de la Tierra produce:|El día y la noche|Las estaciones|Los eclipses|Los terremotos',
+'En Colombia la temperatura varía principalmente según:|La altitud (pisos térmicos)|Las estaciones|La longitud|El tamaño del río',
+'Los derechos humanos son:|Derechos que tienen todas las personas|Privilegios de algunos grupos|Normas solo para adultos|Reglas deportivas',
+'¿En qué año se promulgó la actual Constitución de Colombia?|1991|1886|1810|2000',
+'¿Cuál es una actividad del sector primario de la economía?|La agricultura|La banca|El comercio|El turismo',
+'Colombia está dividida políticamente en:|32 departamentos y el Distrito Capital|20 departamentos|50 departamentos|12 departamentos',
+'La escala de un mapa sirve para:|Relacionar las distancias del mapa con las reales|Colorear regiones|Nombrar países|Medir la temperatura',
+'La globalización consiste en:|La interconexión económica, cultural y política entre países|El aislamiento de los países|Un tipo de clima|Una forma de gobierno',
+'Los puntos cardinales son:|Norte, sur, oriente y occidente|Arriba, abajo, centro y borde|Frente, atrás, izquierda y derecha|Alto, medio, bajo y plano']);
+addBank('ter','Historia',[
+'Cristóbal Colón llegó a América en el año:|1492|1519|1810|1453',
+'¿Quién lideró la Campaña Libertadora que terminó en la Batalla de Boyacá?|Simón Bolívar|Antonio Nariño|José Celestino Mutis|Camilo Torres',
+'Francisco de Paula Santander es recordado como:|El hombre de las leyes|El Libertador|El precursor de la imprenta|El conquistador de Bogotá',
+'La Revolución Francesa comenzó en el año:|1789|1810|1914|1648',
+'La Primera Guerra Mundial se inició en:|1914|1939|1898|1945',
+'La Segunda Guerra Mundial terminó en:|1945|1918|1939|1950',
+'El Imperio Romano de Occidente cayó en el año:|476 d. C.|1453|1492|100 a. C.',
+'La Revolución Industrial comenzó en:|Inglaterra|Francia|Estados Unidos|Japón',
+'La antigua Grecia es conocida como la cuna de:|La democracia|El feudalismo|La imprenta|La máquina de vapor',
+'La escritura jeroglífica pertenece a la civilización:|Egipcia|Romana|Maya|Griega',
+'El Renacimiento se originó en:|Italia|Inglaterra|España|Rusia',
+'Mesopotamia se desarrolló entre los ríos:|Tigris y Éufrates|Nilo y Congo|Amazonas y Orinoco|Danubio y Rin',
+'La Guerra Fría enfrentó principalmente a:|Estados Unidos y la Unión Soviética|Francia y Alemania|China y Japón|Inglaterra y España',
+'El Muro de Berlín cayó en el año:|1989|1961|1945|2001',
+'La esclavitud fue abolida definitivamente en Colombia en:|1851|1810|1991|1925',
+'El Frente Nacional (1958-1974) fue un acuerdo de:|Alternancia en el poder entre liberales y conservadores|Unión con Venezuela|Separación de Panamá|Reforma agraria total',
+'La Constitución Política de 1991 fue elaborada por:|Una Asamblea Nacional Constituyente|El rey de España|Un solo presidente|El ejército',
+'La Gran Colombia fue creada por:|Simón Bolívar|Francisco Pizarro|Hernán Cortés|Gonzalo Jiménez de Quesada',
+'Los muiscas habitaban principalmente en:|El altiplano cundiboyacense|La Amazonía|La costa Pacífica|La isla de San Andrés',
+'La Edad Media se ubica aproximadamente entre:|El siglo V y el siglo XV|El siglo X a. C. y el siglo I|El siglo XVI y el XVIII|El siglo XIX y el XX']);
+addBank('ter','Valores éticos',[
+'La responsabilidad consiste en:|Cumplir los deberes y asumir las consecuencias|Hacer solo lo que me gusta|Culpar a otros|Evitar las tareas',
+'La solidaridad es:|Apoyar a quienes lo necesitan|Pensar solo en uno mismo|Competir siempre|Ignorar los problemas ajenos',
+'La empatía consiste en:|Ponerse en el lugar del otro|Burlarse de los demás|Imponer la opinión propia|Evitar a las personas',
+'El acoso escolar (bullying) es:|Una agresión repetida contra un compañero|Un juego entre amigos|Una discusión de una sola vez|Una forma de disciplina',
+'Ante un conflicto, la mejor forma de resolverlo es:|El diálogo|La violencia|El silencio|La venganza',
+'La gratitud es:|Reconocer y agradecer lo que recibimos|Esperar siempre más|Cobrar los favores|Ocultar lo que sentimos',
+'Cooperar significa:|Trabajar juntos por un objetivo común|Trabajar solo|Aprovecharse del grupo|Evitar el trabajo en equipo',
+'La autoestima es:|La valoración que una persona tiene de sí misma|La opinión de los demás sobre uno|El orgullo excesivo|La timidez',
+'La ética estudia:|La moral y el comportamiento humano|Las estrellas|Los números|Los animales',
+'Ser libre de forma responsable significa:|Decidir respetando los derechos de los demás|Hacer lo que uno quiera sin límites|Obedecer sin pensar|No tomar decisiones',
+'Un derecho fundamental de los niños y niñas es:|La educación|Trabajar desde pequeños|Tomar decisiones de adultos|No tener normas',
+'Una acción para cuidar el medio ambiente es:|Reciclar y ahorrar agua|Quemar basura|Tirar residuos al río|Dejar luces encendidas',
+'La justicia consiste en:|Dar a cada quien lo que le corresponde|Favorecer a los amigos|Castigar sin escuchar|Buscar el beneficio propio',
+'Si encuentras un objeto ajeno, lo correcto es:|Devolverlo a su dueño|Quedártelo|Venderlo|Esconderlo',
+'El plagio consiste en:|Presentar el trabajo de otro como propio|Citar la fuente de una idea|Resumir con tus palabras y citar|Hacer un trabajo original',
+'Ser asertivo es:|Expresar lo que pienso con respeto|Gritar para imponerse|Callar siempre|Burlarse del otro',
+'Las normas de convivencia sirven para:|Vivir en armonía con los demás|Limitar sin razón|Castigar a todos|Favorecer a unos pocos',
+'La dignidad humana significa que:|Toda persona tiene valor sin condición|Solo algunos merecen respeto|El valor depende del dinero|El respeto se gana con poder',
+'La tolerancia es:|Respetar las ideas y diferencias de los demás|Aceptar todo sin pensar|Imponer las propias ideas|Evitar opinar',
+'Pedir perdón sinceramente implica:|Reconocer el error e intentar repararlo|Culpar al otro|Esperar que se olvide|Repetir la falta']);
+addBank('art','Arte y cultura',[
+'Los colores secundarios son:|Naranja, verde y violeta|Rojo, amarillo y azul|Blanco, negro y gris|Rosado, café y beige',
+'Los colores cálidos son:|Rojo, naranja y amarillo|Azul, verde y violeta|Blanco, gris y negro|Azul, café y gris',
+'¿Quién pintó la Mona Lisa?|Leonardo da Vinci|Pablo Picasso|Vincent van Gogh|Fernando Botero',
+'El artista colombiano Fernando Botero es famoso por sus:|Figuras voluminosas|Paisajes abstractos|Retratos diminutos|Esculturas de hielo',
+'«Guernica» es una obra de:|Pablo Picasso|Salvador Dalí|Claude Monet|Frida Kahlo',
+'La guitarra es un instrumento de:|Cuerda|Percusión|Viento|Teclado',
+'El tambor es un instrumento de:|Percusión|Cuerda|Viento|Cuerda frotada',
+'La escala musical básica tiene:|7 notas|5 notas|9 notas|12 notas',
+'La cumbia es un ritmo tradicional de:|Colombia|Japón|Rusia|Canadá',
+'«La noche estrellada» fue pintada por:|Vincent van Gogh|Leonardo da Vinci|Pablo Picasso|Diego Rivera',
+'La escultura es el arte de:|Crear figuras en volumen|Escribir poemas|Componer música|Bailar',
+'El teatro consiste en:|Representar historias ante un público|Pintar paredes|Fabricar instrumentos|Diseñar edificios',
+'La perspectiva en el dibujo sirve para:|Representar la profundidad|Mezclar colores|Hacer sonidos|Medir el tiempo',
+'El pentagrama musical tiene:|5 líneas|3 líneas|7 líneas|10 líneas',
+'El vallenato es un género musical originario de la región:|Caribe|Amazónica|Insular|Andina del sur',
+'El color complementario del rojo es el:|Verde|Naranja|Violeta|Amarillo',
+'La arquitectura es el arte de:|Diseñar y construir edificios|Pintar retratos|Tocar instrumentos|Escribir novelas',
+'La fotografía consiste en:|Captar imágenes mediante la luz|Mezclar sonidos|Esculpir piedra|Tejer telas',
+'La pintura al óleo utiliza pigmentos mezclados con:|Aceite|Agua|Cera de abejas|Alcohol',
+'Un mural es una pintura realizada sobre:|Un muro o pared|Un lienzo pequeño|Un papel|Una tela colgante']);
+addBank('rec','Educación Física',[
+'La capacidad de realizar un esfuerzo durante mucho tiempo se llama:|Resistencia|Flexibilidad|Velocidad|Fuerza',
+'¿Cuántos jugadores por equipo hay en la cancha en un partido de fútbol?|11|9|7|13',
+'¿Cuántos jugadores por equipo hay en la cancha en baloncesto?|5|6|7|11',
+'¿Cuántos jugadores por equipo hay en la cancha en voleibol?|6|5|7|9',
+'La frecuencia cardíaca se mide en:|Pulsaciones por minuto|Metros por segundo|Kilogramos|Litros',
+'Un beneficio de la actividad física regular es:|Mejora la salud cardiovascular|Aumenta el sedentarismo|Disminuye la energía|Debilita los músculos',
+'La carrera de 100 metros planos es una prueba de:|Velocidad|Resistencia|Lanzamiento|Salto',
+'Es importante hidratarse durante el ejercicio para:|Reponer el agua perdida por el sudor|Cansarse más|Evitar respirar|Ganar peso',
+'El «juego limpio» (fair play) consiste en:|Respetar las reglas y a los rivales|Ganar a toda costa|Engañar al árbitro|Insultar al contrario',
+'Un partido de fútbol dura normalmente:|90 minutos|60 minutos|120 minutos|45 minutos en total',
+'Los Juegos Olímpicos de verano se realizan cada:|4 años|2 años|5 años|10 años',
+'El bíceps es un músculo ubicado en:|El brazo|La pierna|El abdomen|La espalda baja',
+'La fuerza es la capacidad de:|Vencer una resistencia|Correr largas distancias|Estirar las articulaciones|Reaccionar rápido',
+'Después de ejercitarse conviene hacer:|Vuelta a la calma y estiramiento|Comer en exceso|Dormir de inmediato|Nada',
+'El tenis se juega con:|Raqueta y pelota|Solo las manos|Un bate|Un palo curvo',
+'Un esguince afecta principalmente a los:|Ligamentos|Pulmones|Dientes|Nervios ópticos',
+'Una canasta de «triple» en baloncesto vale:|3 puntos|2 puntos|1 punto|4 puntos',
+'Una buena alimentación deportiva incluye:|Frutas, verduras, proteínas y carbohidratos|Solo dulces|Solo gaseosas|Ningún alimento',
+'Dormir bien ayuda al deportista a:|Recuperar los músculos|Perder la coordinación|Aumentar el cansancio|Evitar entrenar',
+'La flexibilidad es la capacidad de:|Mover las articulaciones con amplitud|Correr muy rápido|Levantar mucho peso|Aguantar la respiración']);
+addBank('len','Lengua Castellana',[
+'El sustantivo es la palabra que:|Nombra personas, animales, cosas o ideas|Expresa una acción|Indica cualidades|Une oraciones',
+'El verbo es la palabra que expresa:|Acción, estado o proceso|Una cualidad|Un nombre propio|Una exclamación',
+'El adjetivo sirve para:|Indicar cualidades del sustantivo|Expresar acciones|Unir palabras|Señalar el lugar',
+'Un sinónimo de «feliz» es:|Contento|Triste|Enojado|Cansado',
+'Un antónimo de «grande» es:|Pequeño|Enorme|Alto|Amplio',
+'¿Cuál de estas palabras es aguda?|Canción|Mesa|Teléfono|Lápiz',
+'El género literario que expresa sentimientos en verso es el:|Lírico|Narrativo|Dramático|Periodístico',
+'Un cuento es:|Una narración breve|Un poema largo|Una obra de teatro|Una noticia',
+'¿Cuál es el plural de «lápiz»?|Lápices|Lápizes|Lápiz|Lápises',
+'El texto que defiende una idea con razones es:|Argumentativo|Narrativo|Descriptivo|Instructivo',
+'¿Cuántas sílabas tiene la palabra «murciélago»?|4|3|5|2',
+'¿Cuál de estas palabras está escrita correctamente?|Hacer|Aser|Acer|Haser',
+'Si un relato dice «Yo caminaba por la calle», el narrador está en:|Primera persona|Segunda persona|Tercera persona|No hay narrador',
+'En «sus ojos son dos luceros» se usa una:|Metáfora|Rima|Onomatopeya|Hipérbole',
+'Un párrafo es un conjunto de oraciones que desarrollan:|Una idea|Muchos temas distintos|Solo una palabra|Un título',
+'El símil o comparación se reconoce porque usa palabras como:|«Como» o «cual»|«Aunque»|«Porque»|«Entonces»',
+'Las palabras que unen oraciones o palabras (y, o, pero) se llaman:|Conjunciones|Adjetivos|Sustantivos|Verbos',
+'¿Quién escribió «Cien años de soledad»?|Gabriel García Márquez|Jorge Isaacs|Julio Cortázar|Pablo Neruda',
+'El signo que se usa al comenzar una pregunta en español es:|¿|!|¡|;',
+'En la oración «Ana come pan», el verbo es:|come|Ana|pan|No hay verbo']);
+addBank('ext','Inglés',[
+'Choose the correct form: I ___ a student.|am|is|are|be',
+'What is the plural of "child"?|children|childs|childes|childrens',
+'What is the opposite of "hot"?|cold|warm|big|fast',
+'How do you say "azul" in English?|blue|red|green|yellow',
+'Yesterday I ___ to the park.|went|go|goes|going',
+'Which of these is a fruit?|apple|chair|table|pencil',
+'How do you say "gracias" in English?|thank you|please|sorry|goodbye',
+'They ___ playing soccer now.|are|is|am|be',
+'The question word "where" asks about:|place|time|person|reason',
+'What is the past tense of "eat"?|ate|eated|eaten|eating',
+'The book is ___ the table.|on|at|to|for',
+'What is the comparative of "big"?|bigger|more big|biggest|bigest',
+'"How old are you?" asks about:|age|name|place|color',
+'She ___ a book right now.|is reading|reads|read|reading',
+'Answer the question: "Do you like pizza?"|Yes, I do.|Yes, I am.|Yes, it is.|Yes, you do.',
+'What is the opposite of "always"?|never|often|sometimes|usually',
+'Tomorrow I ___ travel to Bogotá.|will|did|was|have',
+'What is the superlative of "good"?|best|better|goodest|most good',
+'I ___ lived here for five years.|have|has|am|was',
+'You ___ wear a seatbelt. It is mandatory.|must|can|may|might']);
+function __unusedBanks(){}
+
+/* Sistemas: 5 preguntas extra por rango para completar 20 */
+[[6,9,'HOJA DE CÁLCULO','¿Qué función devuelve el valor más grande de un rango?',['=MAX(rango)','=MIN(rango)','=SUMA(rango)','=CONTAR(rango)'],0],
+ [6,9,'HOJA DE CÁLCULO','¿Qué función devuelve el valor más pequeño de un rango?',['=MAX(rango)','=MIN(rango)','=PROMEDIO(rango)','=SI(rango)'],1],
+ [6,9,'HOJA DE CÁLCULO','Un archivo de hoja de cálculo que contiene varias hojas se llama:',['Libro','Carpeta','Tabla','Celda'],0],
+ [6,9,'HOJA DE CÁLCULO','En una hoja de cálculo, las filas se identifican con ___ y las columnas con ___:',['números / letras','letras / números','colores / números','letras / letras'],0],
+ [6,9,'HOJA DE CÁLCULO','El controlador de relleno (esquina inferior derecha de la celda) sirve para:',['Copiar fórmulas o series a celdas vecinas','Borrar la hoja','Cambiar el color de fondo','Cerrar el libro'],0],
+ [10,11,'REFERENCIAS','En la referencia $A$1, los signos $ significan que la referencia es:',['Absoluta (no cambia al copiar)','Relativa','De moneda','Un error de escritura'],0],
+ [10,11,'FUNCIONES','¿Qué hace =CONTAR.SI(A1:A10;\">5\")?',['Cuenta las celdas del rango mayores que 5','Suma las celdas mayores que 5','Promedia las celdas menores que 5','Cuenta todas las celdas'],0],
+ [10,11,'FUNCIONES','¿Qué hace =SUMAR.SI(A1:A10;\"Sí\";B1:B10)?',['Suma los valores de B donde A es \"Sí\"','Cuenta cuántos \"Sí\" hay','Promedia la columna B','Busca \"Sí\" en toda la hoja'],0],
+ [10,11,'ANÁLISIS DE DATOS','Una tabla dinámica sirve principalmente para:',['Resumir y analizar grandes conjuntos de datos','Dibujar figuras','Proteger el libro con contraseña','Imprimir en color'],0],
+ [10,11,'ANÁLISIS DE DATOS','El formato condicional permite:',['Cambiar el aspecto de una celda según su valor','Convertir texto en imagen','Bloquear la hoja','Eliminar duplicados automáticamente siempre'],0]
+].forEach(r=>BANK.push({a:'tec',s:'Sistemas',g:[r[0],r[1]],tag:r[2],text:r[3],opts:r[4],correct:r[5]}));
+function genPool(a,s,g){
+  let out=[];
+  AREAS.filter(x=>x.id===a).forEach(ar=>ar.s.forEach(sj=>{
+    const G=GEN[sj]; if(G && (s==='*'||s===sj) && g>=G[0] && g<=G[1]) out=out.concat(G[2](g));
+  }));
+  return out;
+}
+
+function fillSubj(){
+  const a = AREAS.find(x => x.id === $('in-area').value);
+  $('in-subj').innerHTML = '<option value="*">Todas las materias</option>' + a.s.map(s => `<option>${escapeHtml(s)}</option>`).join('');
+  updAvail();
+}
+function poolFor(){
+  const g = parseInt($('in-grade').value, 10), a = $('in-area').value, s = $('in-subj').value;
+  return BANK.filter(q => q.a === a && (s === '*' || q.s === s) && g >= q.g[0] && g <= q.g[1]).concat(genPool(a, s, g));
+}
+function updAvail(){
+  const n = poolFor().length;
+  $('avail').textContent = n ? ('Hay ' + n + ' preguntas precargadas para esta selección' + (n < 20 ? ' (menos de 20: completa con tus 10 cupos propios).' : '.')) : 'No hay preguntas precargadas para esta selección: escribe las tuyas abajo.';
+}
+function curLabel(){
+  const a = AREAS.find(x => x.id === $('in-area').value), s = $('in-subj').value;
+  return a.n + ' · ' + (s === '*' ? 'todas las materias' : s) + ' · ' + $('in-grade').value + '°';
+}
+function sessLabel(s){ return s.label || (s.level + '°'); }
+function buildQuestions(count){
+  const mine = state.custom.slice(0, 10), take = Math.min(count || 20, 20);
+  return shuffleArray(mine.concat(shuffleArray(poolFor()).slice(0, take))).slice(0, 30);
+}
+function addCustom(){
+  const t = $('cq-text').value.trim(), o = [0,1,2,3].map(i => $('cq-o'+i).value.trim());
+  if(!t || o.some(x => !x)){ toast('Completa el enunciado y las 4 opciones.'); return; }
+  if(state.custom.length >= 10){ toast('Ya usaste los 10 cupos propios (20 + 10 = 30).'); return; }
+  const idx = shuffleArray([0,1,2,3]), s = $('in-subj').value;
+  state.custom.push({tag: s === '*' ? 'PROPIA' : s, text: t, opts: idx.map(i => o[i]), correct: idx.indexOf(0)});
+  ['cq-text','cq-o0','cq-o1','cq-o2','cq-o3'].forEach(i => $(i).value = '');
+  renderCustom();
+}
+function renderCustom(){
+  $('cq-count').textContent = state.custom.length + '/10';
+  $('cq-list').innerHTML = state.custom.map((q,i) => `<div class="small-muted" style="margin:4px 0">${i+1}. ${escapeHtml(q.text)} <a href="#" onclick="state.custom.splice(${i},1);renderCustom();return false" style="color:var(--bad)">quitar</a></div>`).join('');
+}
+async function freshCode(){
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; let c = "";
+  for(let t = 0; t < 8; t++){
+    c = ""; for(let i = 0; i < 4; i++) c += chars[Math.floor(Math.random()*chars.length)];
+    try{ const s = await loadSession(c); if(!s || s.status === 'finished') return c; }catch(e){ return c; }
+  }
+  return c;
+}
+
+/* Cuentas docentes: usuario + contraseña (se guarda solo el hash) */
+async function hashPw(u, p){
+  const s = u.toLowerCase() + '|' + p + '|reto-celdas';
+  if(window.crypto && crypto.subtle){
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+    return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2,'0')).join('');
+  }
+  let h = 5381; for(const ch of s) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return 'f' + h;
+}
+function teacherEntry(){ go(state.teacher ? 'view-teacher-create' : 'view-teacher-login'); }
+async function teacherAuth(register){
+  const u = $('t-user').value.trim(), p = $('t-pass').value, err = $('t-error');
+  err.textContent = '';
+  if(u.length < 3 || p.length < 4){ err.textContent = 'Usuario (mín. 3) y contraseña (mín. 4 caracteres).'; return; }
+  const path = 'teachers/' + fbKey(u.toLowerCase());
+  try{
+    const rec = await dbGet(path);
+    if(register){
+      if(rec){ err.textContent = 'Ese usuario ya existe.'; return; }
+      if($('t-key').value.trim() !== CLAVE_DOCENTES){ err.textContent = 'Clave de docentes incorrecta.'; return; }
+      await dbSet(path, {user: u, hash: await hashPw(u, p), createdAt: Date.now()});
+    } else if(!rec || rec.hash !== await hashPw(u, p)){
+      err.textContent = 'Usuario o contraseña incorrectos.'; return;
+    }
+  }catch(e){ err.textContent = 'No se pudo conectar con la base de datos.'; return; }
+  state.teacher = u; $('t-name').textContent = u; $('t-pass').value = ''; $('t-key').value = '';
+  go('view-teacher-create');
+}
+$('in-area').innerHTML = AREAS.map(a => `<option value="${a.id}">${escapeHtml(a.n)}</option>`).join('');
+$('in-grade').innerHTML = [6,7,8,9,10,11].map(g => `<option value="${g}"${g === 9 ? ' selected' : ''}>${g}°</option>`).join('');
+fillSubj();
+
+let _lastNetToast = 0;
+window.addEventListener('unhandledrejection', ev => {
+  ev.preventDefault();
+  if(Date.now() - _lastNetToast > 6000){
+    _lastNetToast = Date.now();
+    toast('Problema de conexión con la base de datos.');
+  }
+});
+if(!USE_CLOUD){ $('mode-banner').style.display = 'block'; }
+
+(function initFromUrl(){
+  const p = new URLSearchParams(window.location.search);
+  const code = p.get('code');
+  const role = p.get('role');
+  if(code && role === 'student'){
+    go('view-student-join');
+    $('join-code').value = code.toUpperCase();
+  }
+})();
+</script>
+</body>
+</html>

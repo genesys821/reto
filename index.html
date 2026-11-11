@@ -1238,7 +1238,8 @@ const AREAS = [
  {id:"ext", n:"Lenguaje extranjero", s:["Inglés"]},
  {id:"mat", n:"Lengua materna", s:["Jxukhthewe'sx Pthusenxi"]},
  {id:"log", n:"Pensamiento lógico", s:["Aritmética","Álgebra","Trigonometría","Cálculo"]},
- {id:"tec", n:"Tecnología e informática", s:["Sistemas"]}
+ {id:"tec", n:"Tecnología e informática", s:["Sistemas"]},
+ {id:"fil", n:"Filosofía", s:["Filosofía"]}
 ];
 const B = [
  ["nat","Biología",6,11,"¿Qué organelo produce la mayor parte de la energía (ATP) de la célula?",["Ribosoma","Mitocondria","Núcleo","Lisosoma"],1],
@@ -1604,6 +1605,111 @@ function __unusedBanks(){}
  [10,11,'ANÁLISIS DE DATOS','Una tabla dinámica sirve principalmente para:',['Resumir y analizar grandes conjuntos de datos','Dibujar figuras','Proteger el libro con contraseña','Imprimir en color'],0],
  [10,11,'ANÁLISIS DE DATOS','El formato condicional permite:',['Cambiar el aspecto de una celda según su valor','Convertir texto en imagen','Bloquear la hoja','Eliminar duplicados automáticamente siempre'],0]
 ].forEach(r=>BANK.push({a:'tec',s:'Sistemas',g:[r[0],r[1]],tag:r[2],text:r[3],opts:r[4],correct:r[5]}));
+/* ===== Nivel exigente (grados 9-11) + Filosofía (grados 10-11) ===== */
+function addHard(a,s,g,rows){ rows.forEach(r=>{ const p=r.split("|"), o=shuffleArray(p.slice(1)); BANK.push({a:a,s:s,g:g,tag:s,hard:true,text:p[0],opts:o,correct:o.indexOf(p[1])}); }); }
+addHard("fil","Filosofía",[10,11],[
+"El método socrático (mayéutica) busca principalmente:|Examinar creencias mediante preguntas hasta revelar contradicciones y llegar a definiciones|Transmitir doctrinas reveladas|Demostrar la superioridad de la retórica sofista|Memorizar verdades dogmáticas",
+"En la alegoría de la caverna de Platón, la salida al exterior y la contemplación del sol simbolizan:|El ascenso del conocimiento sensible a la Idea del Bien|El regreso a la vida política|El triunfo de la opinión|La pérdida de la razón",
+"Para Aristóteles, la causa final de una cosa es:|El fin o propósito para el cual existe|La materia de la que está hecha|La forma que la define|El agente que la produce",
+"La diferencia central entre racionalismo y empirismo es que:|El primero sitúa en la razón el origen del conocimiento y el segundo, en la experiencia|El primero niega la razón y el segundo la defiende|Ambos aceptan las ideas innatas|El empirismo exige la duda metódica",
+"El «cogito, ergo sum» de Descartes es la primera certeza porque:|Resiste incluso la duda más radical, ya que dudar es una forma de pensar|Proviene de la experiencia sensible|Fue revelado por la Iglesia|Se deduce de la física de Newton",
+"Para Kant, los juicios sintéticos a priori son aquellos que:|Amplían el conocimiento y son universales y necesarios, independientes de la experiencia|Solo analizan el contenido de los conceptos|Se obtienen únicamente de la observación|Carecen de valor científico",
+"El imperativo categórico de Kant exige:|Obrar solo según máximas que se puedan querer como ley universal|Buscar la mayor felicidad para el mayor número|Seguir las costumbres del grupo|Elegir lo que más beneficie al individuo",
+"Frente al utilitarismo, la ética kantiana se distingue porque:|Valora la acción por el deber y la intención, no por sus consecuencias|Mide la moralidad por el placer producido|Niega la existencia de normas morales|Fundamenta la moral solo en la voluntad divina",
+"Para Hobbes, el estado de naturaleza es:|Una guerra de todos contra todos que justifica un poder soberano|Una armonía natural entre los hombres|Un gobierno de filósofos|Un régimen de propiedad protegida",
+"Rousseau sostiene que la voluntad general:|Expresa el interés común y fundamenta la legitimidad del contrato social|Es la suma de los intereses particulares|Pertenece a un monarca absoluto|Es innecesaria en el Estado",
+"«Dios ha muerto», en Nietzsche, significa principalmente que:|La fe cristiana ya no sostiene los valores de Occidente, lo que abre paso al nihilismo|Es una afirmación literal sobre la divinidad|Es una defensa del ateísmo científico|Es un llamado a restaurar la religión",
+"Para Sartre, «la existencia precede a la esencia» implica que:|El ser humano se define por sus elecciones y es responsable de ellas|Todos nacemos con una naturaleza fija|Dios determina el destino de cada persona|La esencia se descubre sin actuar",
+"Para Marx, la conciencia de los individuos está condicionada por:|Sus condiciones materiales de existencia y las relaciones de producción|Ideas innatas|La voluntad divina|La razón pura",
+"La falacia ad hominem consiste en:|Atacar a la persona que argumenta en lugar de refutar su argumento|Apelar a la autoridad de un experto|Generalizar a partir de pocos casos|Dar por supuesto lo que se quiere probar",
+"Un argumento deductivo válido se caracteriza porque:|Si sus premisas son verdaderas, la conclusión necesariamente lo es|Su conclusión es solo probable|Generaliza a partir de observaciones|Sus premisas son siempre verdaderas",
+"El criterio de demarcación científica propuesto por Popper es:|La falsabilidad de las teorías|La verificación absoluta|El consenso de la comunidad|La antigüedad de la teoría",
+"Hume critica la causalidad al afirmar que:|Solo percibimos sucesión constante de eventos, no una conexión necesaria entre ellos|La causa se conoce por intuición racional|Toda causa es divina|El principio de causalidad es un juicio analítico",
+"Foucault vincula saber y poder al sostener que:|Los discursos de verdad se producen dentro de relaciones de poder|El saber es neutral y ajeno al poder|El poder solo reprime|La verdad es única y eterna",
+"Con la «banalidad del mal», Hannah Arendt señala que:|Grandes crímenes pueden ser cometidos por personas comunes que renuncian a pensar|El mal es obra exclusiva de monstruos|El mal es inevitable por naturaleza|Obedecer órdenes exime de responsabilidad",
+"Para Aristóteles, la virtud ética es:|Un término medio entre dos extremos, adquirido por hábito y guiado por la prudencia|Un don innato|El placer inmediato|La simple obediencia a la ley"
+]);
+const H=[
+["nat","Biología",[9,11],[
+"En la cadena respiratoria mitocondrial, el aceptor final de electrones es:|El oxígeno|El NADH|El CO₂|La glucosa",
+"Del cruce Aa × Aa (dominancia completa) resulta una proporción fenotípica de:|3 : 1|1 : 1|1 : 2 : 1|9 : 3 : 3 : 1",
+"El entrecruzamiento (recombinación genética) ocurre durante la:|Profase I de la meiosis|Metafase II|Anafase II|Telofase de la mitosis",
+"Una mutación puntual que cambia un nucleótido pero no el aminoácido codificado se llama:|Silenciosa|Sin sentido|De corrimiento del marco de lectura|Deleción cromosómica",
+"El balance neto de la glucólisis por cada molécula de glucosa es:|2 ATP y 2 piruvato|36 ATP y 6 CO₂|4 ATP y 1 piruvato|2 ATP y 2 acetil-CoA"]],
+["nat","Química",[9,11],[
+"¿Cuántos gramos hay en 2 mol de H₂O (H = 1; O = 16)?|36 g|18 g|34 g|32 g",
+"En 2NO₂ ⇌ N₂O₄, al aumentar la presión el equilibrio se desplaza hacia:|La formación de N₂O₄|La formación de NO₂|No se desplaza|La descomposición total",
+"Una disolución con [H⁺] = 1 × 10⁻³ M tiene un pH de:|3|11|−3|7",
+"En una reacción exotérmica:|ΔH es negativo y se libera energía al entorno|ΔH es positivo|Se absorbe calor del entorno|ΔG siempre es positivo",
+"La hibridación del carbono en el etino (acetileno) es:|sp|sp²|sp³|sp³d"]],
+["ter","Ciencias Sociales",[9,11],[
+"La separación de poderes de Montesquieu busca:|Evitar la concentración del poder mediante frenos y contrapesos|Unificar los poderes en el ejecutivo|Eliminar el poder judicial|Dar todo el poder al parlamento",
+"La función principal de la Corte Constitucional de Colombia es:|Guardar la integridad y supremacía de la Constitución|Elaborar las leyes|Administrar el presupuesto nacional|Nombrar al presidente",
+"La inflación se define como:|Un aumento sostenido y generalizado de los precios|Un aumento de la producción|Una caída del desempleo|La subida del precio del dólar",
+"Un Estado-nación es:|Una unidad política soberana que coincide con una comunidad que se reconoce como nación|Una alianza militar|Un imperio multiétnico|Un gobierno local",
+"Según la Constitución de 1991, las tierras de los resguardos indígenas son:|Inalienables, imprescriptibles e inembargables|Propiedad privada individual|Terrenos baldíos|Parques nacionales"]],
+["ter","Historia",[9,11],[
+"El Tratado de Versalles (1919) impuso a Alemania:|Reparaciones, pérdidas territoriales y la cláusula de culpabilidad de la guerra|La anexión de Francia|Una alianza con Rusia|La ocupación de Inglaterra",
+"La Revolución de octubre de 1917 en Rusia llevó al poder a:|Los bolcheviques de Lenin|Los mencheviques|El zar Nicolás II|El gobierno provisional de Kerensky",
+"La Regeneración colombiana (1880-1900) se caracterizó por:|La Constitución centralista de 1886 y el acercamiento a la Iglesia|El federalismo radical|La Constitución de Rionegro|La separación entre Iglesia y Estado",
+"El Bogotazo de 1948 se desató tras el asesinato de:|Jorge Eliécer Gaitán|Rafael Uribe Uribe|Luis Carlos Galán|Alfonso López Pumarejo",
+"La Conferencia de Berlín (1884-1885) regló:|El reparto colonial de África entre potencias europeas|El final de la Primera Guerra Mundial|La independencia de Latinoamérica|La creación de la Liga de Naciones"]],
+["ter","Valores éticos",[9,11],[
+"La ética deontológica juzga una acción según:|El deber o la norma, con independencia de las consecuencias|Sus consecuencias|La felicidad que produce|Las costumbres del grupo",
+"La objeción de conciencia consiste en:|Negarse a cumplir un deber legal por convicciones morales profundas|Desobedecer por comodidad|Evadir una obligación sin razón|Denunciar a otros",
+"La diferencia entre moral y ética es que:|La moral son las normas vigentes en una sociedad y la ética reflexiona críticamente sobre ellas|Son idénticas|La ética es solo religiosa|La moral es una teoría filosófica",
+"El relativismo moral sostiene que:|La validez de las normas morales depende de la cultura o el contexto|Existen normas morales universales|Todo lo legal es moral|La moral es innata",
+"Hay conflicto de intereses cuando:|Un interés personal puede influir indebidamente en una decisión profesional|Dos personas discuten|Existe desacuerdo político|Se incumple un horario"]],
+["art","Arte y cultura",[9,11],[
+"El cubismo (Picasso y Braque) se caracteriza por:|Descomponer los objetos en planos geométricos y múltiples puntos de vista|Captar la luz del instante|Representar sueños y el inconsciente|Reproducir fielmente la realidad",
+"El impresionismo buscó:|Captar los efectos de la luz y el color con pincelada suelta|El dibujo preciso y académico|Representar el inconsciente|La geometría pura",
+"El claroscuro de Caravaggio consiste en:|Fuertes contrastes de luz y sombra para dar volumen y dramatismo|El uso de colores planos|La perspectiva aérea|El puntillismo",
+"El surrealismo (Breton, Dalí) exploró principalmente:|El inconsciente y el mundo onírico|La vida industrial|La geometría pura|La luz natural",
+"Un compás de 3/4 tiene:|Tres tiempos con la negra como unidad|Cuatro tiempos de negra|Tres tiempos de corchea|Dos tiempos de blanca"]],
+["rec","Educación Física",[9,11],[
+"La frecuencia cardíaca máxima teórica se estima aproximadamente como:|220 − edad|180 + edad|200 − peso|100 − edad",
+"El principio de sobrecarga progresiva establece que:|Para mejorar, la carga debe aumentarse gradualmente por encima del nivel habitual|Se debe entrenar siempre con la misma carga|El descanso total mejora el rendimiento|La carga debe reducirse cada semana",
+"El índice de masa corporal (IMC) se calcula como:|Peso (kg) dividido por la talla (m) al cuadrado|Talla dividida por el peso|Peso multiplicado por la talla|Peso dividido por la talla sin elevar",
+"En esfuerzos máximos de menos de 10 segundos predomina el sistema energético:|ATP-PC (fosfágenos)|Aeróbico|Glucólisis lenta|Oxidación de grasas",
+"El entrenamiento aeróbico suele realizarse entre el 60 % y el 80 % de la:|Frecuencia cardíaca máxima|Fuerza máxima|Talla|Flexibilidad máxima"]],
+["len","Lengua Castellana",[9,11],[
+"El hipérbaton es una figura que consiste en:|Alterar el orden habitual de las palabras en la oración|Exagerar una idea|Repetir una palabra al inicio de cada verso|Comparar dos elementos con «como»",
+"«Cien años de soledad» se inscribe en la corriente literaria del:|Realismo mágico|Romanticismo|Modernismo|Naturalismo",
+"En «Quiero que vengas», la oración «que vengas» funciona como:|Complemento directo del verbo|Sujeto|Complemento circunstancial|Atributo",
+"El conector «sin embargo» expresa:|Oposición o contraste|Causa|Consecuencia|Adición",
+"En un texto argumentativo, la tesis es:|La idea central que el autor defiende|Un dato de apoyo|Un ejemplo ilustrativo|El título del texto"]],
+["ext","Inglés",[9,11],[
+"If I had known about the exam, I ___ harder.|would have studied|will study|had studied|would study",
+"She suggested ___ the meeting until Monday.|postponing|to postpone|postpone|postponed",
+"Which sentence is in the passive voice?|The report was written by the committee.|The committee wrote the report.|The committee is writing the report.|The committee will write the report.",
+"Hardly had he arrived ___ it started to rain.|when|than|that|then",
+"\"To take something for granted\" means:|To assume it will always be there without appreciating it|To receive it as a gift|To refuse it|To pay for it in advance"]],
+["log","Álgebra",[9,11],[
+"Si f(x) = 2x² − 3x + 1, ¿cuánto vale f(−2)?|15|3|−1|11",
+"Resuelve log₂(x + 3) = 4. El valor de x es:|13|5|1|7",
+"Las soluciones de 2x² − 7x + 3 = 0 son:|x = 3 y x = 1/2|x = 3 y x = 2|x = −3 y x = −1/2|x = 7 y x = 3",
+"En el sistema 2x + 3y = 12 y x − y = 1, el valor de x + y es:|5|6|4|7",
+"El dominio de f(x) = √(x − 3) / (x − 5) es:|[3, ∞) excepto x = 5|(3, ∞)|Todos los reales excepto 5|[3, 5)"]],
+["log","Trigonometría",[10,11],[
+"Si sen θ = 3/5, entonces cos 2θ es:|7/25|−7/25|24/25|16/25",
+"Las soluciones de sen x = 1/2 en [0, 2π] son:|π/6 y 5π/6|π/6 y 7π/6|π/3 y 2π/3|π/4 y 3π/4",
+"En un triángulo con lados 3 y 4 que forman un ángulo de 60°, el tercer lado mide:|√13|5|√37|7",
+"La identidad pitagórica que relaciona tangente y secante es:|1 + tan²θ = sec²θ|1 + sec²θ = tan²θ|sen²θ + tan²θ = 1|tan²θ − cos²θ = 1",
+"El período de y = sen(3x) es:|2π/3|6π|2π|π/3"]],
+["log","Cálculo",[11,11],[
+"La derivada de f(x) = x·eˣ es:|eˣ(x + 1)|x·eˣ|eˣ|x·eˣ⁻¹",
+"El valor de ∫₀^π sen x dx es:|2|0|1|−2",
+"El valor de lím (x → 0) sen x / x es:|1|0|∞|No existe",
+"La derivada de f(x) = ln(x² + 1) es:|2x / (x² + 1)|1 / (x² + 1)|2x·ln(x² + 1)|x / (x² + 1)",
+"La función f(x) = x³ − 3x tiene un mínimo local en:|x = 1|x = −1|x = 0|x = 3"]],
+["tec","Sistemas",[9,11],[
+"=BUSCARV(A2;D1:F10;3;FALSO) devuelve:|El valor de la 3.ª columna del rango en la fila donde la 1.ª columna coincide exactamente con A2|La suma de la columna F|El valor más cercano a A2 en cualquier columna|El número de fila donde está A2",
+"Con A1 = 7 y B1 = 12, =SI(Y(A1>5;B1<10);«OK»;«NO») devuelve:|NO|OK|VERDADERO|Error",
+"=INDICE(A1:A5;COINCIDIR(30;B1:B5;0)) hace lo siguiente:|Devuelve el valor de A situado en la misma posición donde B vale 30|Suma los valores de A1 a A5|Cuenta cuántos 30 hay en B|Busca 30 en la columna A",
+"El número binario 1101 equivale en decimal a:|13|11|14|12",
+"La búsqueda binaria solo funciona correctamente si los datos están:|Ordenados|Repetidos|Escritos en binario|Almacenados en la nube"]]
+];
+H.forEach(h=>addHard(h[0],h[1],h[2],h[3]));
 function genPool(a,s,g){
   let out=[];
   AREAS.filter(x=>x.id===a).forEach(ar=>ar.s.forEach(sj=>{
@@ -1632,7 +1738,9 @@ function curLabel(){
 function sessLabel(s){ return s.label || (s.level + '°'); }
 function buildQuestions(count){
   const mine = state.custom.slice(0, 10), take = Math.min(count || 20, 20);
-  return shuffleArray(mine.concat(shuffleArray(poolFor()).slice(0, take))).slice(0, 30);
+  const pool = shuffleArray(poolFor()), g = parseInt($('in-grade').value, 10);
+  if(g >= 9) pool.sort((x, y) => (y.hard ? 1 : 0) - (x.hard ? 1 : 0)); /* grados 9-11: primero las preguntas exigentes */
+  return shuffleArray(mine.concat(pool.slice(0, take))).slice(0, 30);
 }
 function addCustom(){
   const t = $('cq-text').value.trim(), o = [0,1,2,3].map(i => $('cq-o'+i).value.trim());
